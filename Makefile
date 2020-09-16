@@ -26,3 +26,20 @@ docker-build:
 		-t $(NAME):$(TAG) .
 	@echo $(NAME):$(TAG) is built
 	@echo "::set-output name=tag::$(NAME):$(TAG)"
+
+.PHONY: tag-intermediate-stages
+tag-intermediate-stages:
+	docker build \
+		--build-arg ENABLE_PROCESS_AGENT=$(ENABLE_PROCESS_AGENT) \
+		--build-arg ENABLE_SECURITY_AGENT=$(ENABLE_SECURITY_AGENT) \
+		--build-arg ENABLE_TRACE_AGENT=$(ENABLE_TRACE_AGENT) \
+		--build-arg ENABLE_SYSTEM_PROBE=$(ENABLE_SYSTEM_PROBE) \
+		--target systemd-builder \
+		-t cache-systemd-builder .
+	docker build \
+		--build-arg ENABLE_PROCESS_AGENT=$(ENABLE_PROCESS_AGENT) \
+		--build-arg ENABLE_SECURITY_AGENT=$(ENABLE_SECURITY_AGENT) \
+		--build-arg ENABLE_TRACE_AGENT=$(ENABLE_TRACE_AGENT) \
+		--build-arg ENABLE_SYSTEM_PROBE=$(ENABLE_SYSTEM_PROBE) \
+		--target agent-builder \
+		-t cache-agent-builder .

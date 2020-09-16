@@ -19,6 +19,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Cache
+        uses: actions/cache@v2
+        env:
+          cache-name: docker-image-layer
+        with:
+          path: ~/images.tar
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.ref }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-refs/heads/master
+      - name: Import cache
+        run: |
+          if [ -f ~/images.tar ]; then
+            docker load -i ~/images.tar
+          fi
+
       - name: Build images
         id: build
         run: |
@@ -28,6 +44,21 @@ jobs:
             ENABLE_SECURITY_AGENT=${SECURITY_AGENT} \
             ENABLE_TRACE_AGENT=${TRACE_AGENT} \
             ENABLE_SYSTEM_PROBE=${SYSTEM_PROBE}
+
+      - name: Export cache
+        run: |
+          eval ${{ matrix.enable }}
+          make tag-intermediate-stages \
+            ENABLE_PROCESS_AGENT=${PROCESS_AGENT} \
+            ENABLE_SECURITY_AGENT=${SECURITY_AGENT} \
+            ENABLE_TRACE_AGENT=${TRACE_AGENT} \
+            ENABLE_SYSTEM_PROBE=${SYSTEM_PROBE}
+          docker save -o ~/images.tar \
+            $(echo \
+                cache-systemd-builder \
+                cache-agent-builder \
+                ${{ steps.build.outputs.tag }} \
+              | xargs -n1 docker history -q | grep -v '<missing>' )
 
       - name: Login to GitHub Packages
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
