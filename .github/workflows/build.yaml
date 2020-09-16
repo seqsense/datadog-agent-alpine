@@ -19,17 +19,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Get image tag
+        id: tag
+        run: make show-image-tag
+      - name: Pull previous image
+        run: |
+          docker pull \
+              ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }} \
+            && docker tag \
+                ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }} \
+                ${{ steps.tag.outputs.tag }} \
+            || true
+
       - name: Build images
         id: build
+        env:
+          BUILD_OPTS: "--cache-from ${{ steps.tag.outputs.tag }} --pull"
         run: |
           eval ${{ matrix.enable }}
           make docker-build \
+            BUILD_OPTS="${BUILD_OPTS}" \
             ENABLE_PROCESS_AGENT=${PROCESS_AGENT} \
             ENABLE_SECURITY_AGENT=${SECURITY_AGENT} \
             ENABLE_TRACE_AGENT=${TRACE_AGENT} \
             ENABLE_SYSTEM_PROBE=${SYSTEM_PROBE}
 
-      - name: Login to GitHub Packages
+      - name: Login to GitHub Container Registry
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         uses: docker/login-action@v1
         with:
@@ -40,7 +55,7 @@ jobs:
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         run: |
           docker tag \
-            ${{ steps.build.outputs.tag }} \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.build.outputs.tag }}
+            ${{ steps.tag.outputs.tag }} \
+            ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}
           docker push \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.build.outputs.tag }}
+            ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}
