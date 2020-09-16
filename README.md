@@ -26,6 +26,21 @@ For some reason, this image requires `seccomp` or `apparmor` setting to use `jou
 docker run --security-opt=seccomp=unconfined --security-opt=apparmor=unconfined ...
 ```
 
+## Docker images
+
+Pre-built images with some combination of the features are available on GitHub Container Registry.
+
+```shell
+# Image including process-agent
+docker pull ghcr.io/seqsense/datadog-agent:7-proc-alpine
+
+# Image including process-agent and trace-agent
+docker pull ghcr.io/seqsense/datadog-agent:7-proc-apm-alpine
+
+# Image including process-agent, security-agent, trace-agent, and system-probe
+docker pull ghcr.io/seqsense/datadog-agent:7-all-alpine
+```
+
 ## License
 The scripts to build the images are licensed under the [Apache License, Version 2.0](LICENSE).
 
