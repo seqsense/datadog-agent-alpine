@@ -3,7 +3,6 @@ Small footprint datadog-agent  based on Alpine Linux
 
 ## Getting started
 Availability of `process-agent`, `security-agent`, `trace-agent`, and `system-probe` can be switched by the make arguments: `ENABLE_PROCESS_AGENT`, `ENABLE_SECURITY_AGENT`, `ENABLE_TRACE_AGENT`, `ENABLE_SYSTEM_PROBE` (set `1` to enable)
-`process-agent` is enabled by default.
 
 Installed integrations can be selected by `INTEGRATIONS_CORE` argument.
 `btrfs`, `disk`, `ssh_check`, `statsd`, `system_core`, `system_swap` are enabled by default.
@@ -31,6 +30,9 @@ docker run --security-opt=seccomp=unconfined --security-opt=apparmor=unconfined 
 Pre-built images with some combination of the features are available on GitHub Container Registry.
 
 ```shell
+# Minimal image
+docker pull ghcr.io/seqsense/datadog-agent:7-alpine
+
 # Image including process-agent
 docker pull ghcr.io/seqsense/datadog-agent:7-proc-alpine
 
