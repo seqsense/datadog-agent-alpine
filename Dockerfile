@@ -215,7 +215,8 @@ RUN echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/ap
   && apk del .build-deps \
   && sed '/^@testing /d' -i /etc/apk/repositories \
   && rm -f /var/cache/apk/* \
-  && find /usr/lib -name "*.pyc" -delete
+  && find /usr -name "*.pyc" -delete \
+  && find /usr -name "__pycache__" -delete
 
 RUN mkdir -p \
     /checks.d \
@@ -230,17 +231,17 @@ RUN mkdir -p \
 COPY --from=systemd-builder /usr/local/lib/libsystemd* /usr/lib/
 
 # Install datadog agent
-COPY --from=agent-builder /build/datadog-agent/dev/lib/*                     /usr/lib/
-COPY --from=agent-builder /opt/datadog-agent                                 /opt/datadog-agent/
-COPY --from=agent-builder /etc/datadog-agent                                 /etc/datadog-agent/
 COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/s6-services /etc/services.d/
 COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/entrypoint  /etc/cont-init.d/
-COPY --from=agent-builder /agent-bin/* /usr/bin/
 COPY --from=agent-builder \
   /build/datadog-agent/Dockerfiles/agent/probe.sh \
   /build/datadog-agent/Dockerfiles/agent/initlog.sh \
   /build/datadog-agent/Dockerfiles/agent/secrets-helper/readsecret.py \
   /
+COPY --from=agent-builder /build/datadog-agent/dev/lib/* /usr/lib/
+COPY --from=agent-builder /etc/datadog-agent             /etc/datadog-agent/
+COPY --from=agent-builder /opt/datadog-agent             /opt/datadog-agent/
+COPY --from=agent-builder /agent-bin/*                   /usr/bin/
 
 # Disable omitted agents
 RUN if [ ! -f /usr/bin/process-agent   ]; then rm -rf /etc/services.d/process;  fi \
@@ -274,7 +275,8 @@ RUN apk add --force-broken-world --virtual .build-deps git \
   && apk del --force-broken-world .build-deps \
   && cd / && rm -rf /tmp/integrations-core \
   && rm -f /var/cache/apk/* \
-  && find /usr/lib -name "*.pyc" -delete
+  && find /usr -name "*.pyc" -delete \
+  && find /usr -name "__pycache__" -delete
 
 EXPOSE 8125/udp 8126/tcp
 
