@@ -26,9 +26,8 @@ jobs:
           cache-name: docker-image-layer
         with:
           path: ~/images.tar
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.ref }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-refs/heads/master
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.enable }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.enable }}-
       - name: Import cache
         run: |
           if [ -f ~/images.tar ]; then
