@@ -215,7 +215,8 @@ RUN echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/ap
   && apk del .build-deps \
   && sed '/^@testing /d' -i /etc/apk/repositories \
   && rm -f /var/cache/apk/* \
-  && find /usr -name "*.pyc" -delete
+  && find /usr -name "*.pyc" -delete \
+  && find /usr -name "__pycache__" -delete
 
 RUN mkdir -p \
     /checks.d \
@@ -274,7 +275,8 @@ RUN apk add --force-broken-world --virtual .build-deps git \
   && apk del --force-broken-world .build-deps \
   && cd / && rm -rf /tmp/integrations-core \
   && rm -f /var/cache/apk/* \
-  && find /usr -name "*.pyc" -delete
+  && find /usr -name "*.pyc" -delete \
+  && find /usr -name "__pycache__" -delete
 
 EXPOSE 8125/udp 8126/tcp
 
