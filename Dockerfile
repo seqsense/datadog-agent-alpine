@@ -135,6 +135,39 @@ RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
     mv bin/system-probe/system-probe /agent-bin/; \
   fi
 
+RUN mkdir -p \
+    /opt/datadog-agent/bin/agent/dist \
+    /opt/datadog-agent/run \
+    /etc/datadog-agent \
+  && touch /opt/datadog-agent/requirements-agent-release.txt \
+  && touch /opt/datadog-agent/final_constraints-py3.txt
+
+RUN cp /build/datadog-agent/bin/agent/agent /opt/datadog-agent/bin/agent/agent
+RUN cp -r \
+  /build/datadog-agent/bin/agent/dist/checks \
+  /build/datadog-agent/bin/agent/dist/config.py \
+  /build/datadog-agent/bin/agent/dist/utils \
+  /build/datadog-agent/bin/agent/dist/views \
+  /opt/datadog-agent/bin/agent/dist/
+
+RUN cp -r /build/datadog-agent/bin/agent/dist/conf.d /etc/datadog-agent/conf.d/
+RUN cp \
+  /build/datadog-agent/Dockerfiles/agent/datadog-docker.yaml \
+  /build/datadog-agent/Dockerfiles/agent/datadog-ecs.yaml \
+  /build/datadog-agent/bin/agent/dist/system-probe.yaml \
+  /etc/datadog-agent/
+RUN cp \
+  /build/datadog-agent/bin/agent/dist/datadog.yaml \
+  /etc/datadog-agent/datadog.yaml.example
+
+# Remove unused configs
+RUN rm -rf \
+  /etc/datadog-agent/conf.d/apm.yaml.default \
+  /etc/datadog-agent/conf.d/process_agent.yaml.default \
+  /etc/datadog-agent/conf.d/winproc.d \
+  /etc/datadog-agent/conf.d/jmx.d \
+  /etc/datadog-agent/conf.d/kubernetes_apiserver.d
+
 
 # ===========================
 FROM alpine:3.12 AS datadog-agent
@@ -183,20 +216,22 @@ RUN echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/ap
   && rm -f /var/cache/apk/* \
   && find /usr/lib -name "*.pyc" -delete
 
-RUN mkdir -p /opt/datadog-agent /opt/datadog-agent/run /var/log/datadog \
+RUN mkdir -p \
+    /checks.d \
+    /conf.d \
+    /opt/datadog-agent \
+    /opt/datadog-agent/run \
+    /var/log/datadog \
   && touch /opt/datadog-agent/requirements-agent-release.txt \
-  && touch /opt/datadog-agent/final_constraints-py3.txt
+  && touch /opt/datadog-agent/final_constraints-py3.txt \
+  && ln -s /usr /opt/datadog-agent/embedded
 
 COPY --from=systemd-builder /usr/local/lib/libsystemd* /usr/lib/
 
 # Install datadog agent
 COPY --from=agent-builder /build/datadog-agent/dev/lib/*                     /usr/lib/
-COPY --from=agent-builder /build/datadog-agent/bin/agent/agent               /opt/datadog-agent/bin/agent/agent
-COPY --from=agent-builder /build/datadog-agent/bin/agent/dist/checks         /opt/datadog-agent/bin/agent/dist/checks/
-COPY --from=agent-builder /build/datadog-agent/bin/agent/dist/config.py      /opt/datadog-agent/bin/agent/dist/
-COPY --from=agent-builder /build/datadog-agent/bin/agent/dist/utils          /opt/datadog-agent/bin/agent/dist/utils/
-COPY --from=agent-builder /build/datadog-agent/bin/agent/dist/views          /opt/datadog-agent/bin/agent/dist/views/
-COPY --from=agent-builder /build/datadog-agent/bin/agent/dist/conf.d         /etc/datadog-agent/conf.d/
+COPY --from=agent-builder /opt/datadog-agent                                 /opt/datadog-agent/
+COPY --from=agent-builder /etc/datadog-agent                                 /etc/datadog-agent/
 COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/s6-services /etc/services.d/
 COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/entrypoint  /etc/cont-init.d/
 COPY --from=agent-builder /agent-bin/* /usr/bin/
@@ -205,22 +240,6 @@ COPY --from=agent-builder \
   /build/datadog-agent/Dockerfiles/agent/initlog.sh \
   /build/datadog-agent/Dockerfiles/agent/secrets-helper/readsecret.py \
   /
-COPY --from=agent-builder \
-  /build/datadog-agent/Dockerfiles/agent/datadog-docker.yaml \
-  /build/datadog-agent/Dockerfiles/agent/datadog-ecs.yaml \
-  /build/datadog-agent/bin/agent/dist/system-probe.yaml \
-  /etc/datadog-agent/
-COPY --from=agent-builder \
-  /build/datadog-agent/bin/agent/dist/datadog.yaml \
-  /etc/datadog-agent/datadog.yaml.example
-
-# Remove unused configs
-RUN rm -rf \
-  /etc/datadog-agent/conf.d/apm.yaml.default \
-  /etc/datadog-agent/conf.d/process_agent.yaml.default \
-  /etc/datadog-agent/conf.d/winproc.d \
-  /etc/datadog-agent/conf.d/jmx.d \
-  /etc/datadog-agent/conf.d/kubernetes_apiserver.d
 
 # Disable omitted agents
 RUN if [ ! -f /usr/bin/process-agent   ]; then rm -rf /etc/services.d/process;  fi \
@@ -228,11 +247,9 @@ RUN if [ ! -f /usr/bin/process-agent   ]; then rm -rf /etc/services.d/process;  
   && if [ ! -f /usr/bin/trace-agent    ]; then rm -rf /etc/services.d/trace;    fi \
   && if [ ! -f /usr/bin/system-probe   ]; then rm -rf /etc/services.d/sysprobe; fi
 
-RUN ln -s /usr /opt/datadog-agent/embedded
-
 ENV DOCKER_DD_AGENT=true \
     DD_PYTHON_VERSION=3 \
-    PATH=/opt/datadog-agent/bin/agent/:/opt/datadog-agent/bin/process-agent/:/opt/datadog-agent/bin/security-agent/:/opt/datadog-agent/bin/trace-agent/:$PATH \
+    PATH=/opt/datadog-agent/bin/agent/:/opt/datadog-agent/embedded/bin:$PATH \
     S6_KEEP_ENV=1 \
     S6_LOGGING=0 \
     S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
@@ -257,8 +274,6 @@ RUN apk add --force-broken-world --virtual .build-deps git \
   && cd / && rm -rf /tmp/integrations-core \
   && rm -f /var/cache/apk/* \
   && find /usr/lib -name "*.pyc" -delete
-
-RUN mkdir -p /conf.d /checks.d
 
 EXPOSE 8125/udp 8126/tcp
 
