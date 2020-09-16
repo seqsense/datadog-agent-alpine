@@ -1,0 +1,12 @@
+diff --git a/tasks/system_probe.py b/tasks/system_probe.py
+index e320fa9db..3c53d045a 100644
+--- a/tasks/system_probe.py
++++ b/tasks/system_probe.py
+@@ -309,6 +309,7 @@ def build_object_files(ctx, bundle_ebpf=False):
+         '-Wunused',
+         '-Wall',
+         '-Werror',
++        '-fno-stack-protector',
+         "-include {}".format(os.path.join(c_dir, "asm_goto_workaround.h")),
+         '-O2',
+         '-emit-llvm',
