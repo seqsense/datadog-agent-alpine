@@ -20,14 +20,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Create cache key
+        id: cache-key
+        run: |
+          eval ${{ matrix.enable }}
+          echo "::set-output name=key::${{ runner.os }}-docker-image-layer-${PROCESS_AGENT}${SECURITY_AGENT}${TRACE_AGENT}${SYSTEM_PROBE}"
       - name: Cache
         uses: actions/cache@v2
-        env:
-          cache-name: docker-image-layer
         with:
           path: ~/images.tar
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.enable }}-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.enable }}-
+          key: ${{ steps.cache-key.outputs.key }}-${{ github.sha }}
+          restore-keys: ${{ steps.cache-key.outputs.key }}-
       - name: Import cache
         run: |
           if [ -f ~/images.tar ]; then
