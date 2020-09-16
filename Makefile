@@ -2,10 +2,18 @@ NAME     := datadog-agent
 
 DATADOG_MAJOR_VERSION := 7
 
-ENABLE_PROCESS_AGENT  ?= 1
+ENABLE_PROCESS_AGENT  ?= 0
 ENABLE_SECURITY_AGENT ?= 0
 ENABLE_TRACE_AGENT    ?= 0
 ENABLE_SYSTEM_PROBE   ?= 0
+
+INTEGRATIONS_CORE ?= \
+  btrfs \
+  disk \
+  ssh_check \
+  statsd \
+  system_core \
+  system_swap
 
 BUILD_OPTS ?=
 
@@ -26,6 +34,7 @@ docker-build:
 		--build-arg ENABLE_SECURITY_AGENT=$(ENABLE_SECURITY_AGENT) \
 		--build-arg ENABLE_TRACE_AGENT=$(ENABLE_TRACE_AGENT) \
 		--build-arg ENABLE_SYSTEM_PROBE=$(ENABLE_SYSTEM_PROBE) \
+		--build-arg INTEGRATIONS_CORE="$(INTEGRATIONS_CORE)" \
 		-t $(NAME):$(TAG) .
 	@echo $(NAME):$(TAG) is built
 

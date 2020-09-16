@@ -100,27 +100,27 @@ RUN invoke agent.build \
 RUN mkdir -p /agent-bin \
   && touch /agent-bin/.keep
 
-ARG ENABLE_PROCESS_AGENT=1
+ARG ENABLE_PROCESS_AGENT=0
 RUN if [ ${ENABLE_PROCESS_AGENT} -eq 1 ]; then \
     invoke process-agent.build \
       --python-runtimes=3; \
     mv bin/process-agent/process-agent /agent-bin/; \
   fi
 
-ARG ENABLE_SECURITY_AGENT=1
+ARG ENABLE_SECURITY_AGENT=0
 RUN if [ ${ENABLE_SECURITY_AGENT} -eq 1 ]; then \
     invoke security-agent.build; \
     mv bin/security-agent/security-agent /agent-bin/; \
   fi
 
-ARG ENABLE_TRACE_AGENT=1
+ARG ENABLE_TRACE_AGENT=0
 RUN if [ ${ENABLE_TRACE_AGENT} -eq 1 ]; then \
     invoke trace-agent.build \
       --python-runtimes=3; \
     mv bin/trace-agent/trace-agent /agent-bin/; \
   fi
 
-ARG ENABLE_SYSTEM_PROBE=1
+ARG ENABLE_SYSTEM_PROBE=0
 COPY 01-bpf-disable-stack-protector.patch /build/
 RUN patch -p1 < /build/01-bpf-disable-stack-protector.patch
 RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
