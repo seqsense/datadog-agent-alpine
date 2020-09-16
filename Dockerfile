@@ -97,7 +97,8 @@ RUN invoke agent.build \
     --exclude-rtloader \
     --build-exclude=jmx,kubeapiserver,gce,ec2
 
-RUN mkdir -p /agent-bin
+RUN mkdir -p /agent-bin \
+  && touch /agent-bin/.keep
 
 ARG ENABLE_PROCESS_AGENT=1
 RUN if [ ${ENABLE_PROCESS_AGENT} -eq 1 ]; then \
