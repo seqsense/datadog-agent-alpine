@@ -14,14 +14,19 @@ index a36d61070..c26f2d730 100644
  #    endif
  
 diff --git a/rtloader/rtloader/CMakeLists.txt b/rtloader/rtloader/CMakeLists.txt
-index 0fd0a2abc..5c804c4be 100644
+index 0fd0a2abc..bb39b5d17 100644
 --- a/rtloader/rtloader/CMakeLists.txt
 +++ b/rtloader/rtloader/CMakeLists.txt
-@@ -27,6 +27,7 @@ add_library(datadog-agent-rtloader SHARED
+@@ -27,6 +27,12 @@ add_library(datadog-agent-rtloader SHARED
      rtloader.cpp
      ../common/rtloader_mem.c
  )
-+target_link_libraries(datadog-agent-rtloader execinfo)
++
++# execinfo is not POSIX-compliant and some libc may have libexecinfo as a library.
++find_library(EXECINFO execinfo)
++if(EXECINFO)
++    target_link_libraries(datadog-agent-rtloader execinfo)
++endif()
  endif()
  
  set_target_properties(datadog-agent-rtloader PROPERTIES
