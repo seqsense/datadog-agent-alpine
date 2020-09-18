@@ -74,14 +74,16 @@ RUN git clone -b ${DATADOG_VERSION} --depth=1 https://github.com/DataDog/datadog
 
 WORKDIR /build/datadog-agent
 
-COPY 00-fix-non-posix-ext.patch /build/
-RUN patch -p1 < /build/00-fix-non-posix-ext.patch \
-  && patch -p1 < /build/01-fix-deps.patch \
-  && invoke deps
+COPY 00-fix-deps.patch /build/
+RUN patch -p1 < /build/00-fix-deps.patch
+RUN invoke deps
 
 ENV CGO_CFLAGS="-Os -I/build/datadog-agent/dev/include" \
   CGO_LDFLAGS="-L/build/datadog-agent/dev/lib" \
   GOFLAGS="-ldflags=-w -ldflags=-s"
+
+COPY 01-fix-non-posix-ext.patch /build/
+RUN patch -p1 < /build/01-fix-non-posix-ext.patch
 
 RUN invoke rtloader.make \
     --python-runtimes=3 \
