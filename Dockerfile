@@ -76,6 +76,7 @@ WORKDIR /build/datadog-agent
 
 COPY 00-fix-non-posix-ext.patch /build/
 RUN patch -p1 < /build/00-fix-non-posix-ext.patch \
+  && patch -p1 < /build/01-fix-deps.patch \
   && invoke deps
 
 ENV CGO_CFLAGS="-Os -I/build/datadog-agent/dev/include" \
@@ -121,8 +122,8 @@ RUN if [ ${ENABLE_TRACE_AGENT} -eq 1 ]; then \
   fi
 
 ARG ENABLE_SYSTEM_PROBE=0
-COPY 01-bpf-disable-stack-protector.patch /build/
-RUN patch -p1 < /build/01-bpf-disable-stack-protector.patch
+COPY 02-bpf-disable-stack-protector.patch /build/
+RUN patch -p1 < /build/02-bpf-disable-stack-protector.patch
 RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
     apk add --no-cache \
       bcc-dev \
