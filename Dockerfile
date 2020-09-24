@@ -42,6 +42,8 @@ RUN ./configure \
 RUN ninja -C build libsystemd.so.${SYSTEMD_LIB_VERSION}
 RUN cp build/libsystemd* /usr/local/lib/
 
+RUN strip -s /usr/local/lib/libsystemd*.so
+
 
 # ===========================
 FROM golang:1.14-alpine3.12 AS agent-builder
@@ -92,6 +94,8 @@ RUN invoke rtloader.make \
       -DCMAKE_CXX_FLAGS=-Os \
       -DCMAKE_C_FLAGS=-Os" \
   && invoke rtloader.install
+
+RUN strip -s /build/datadog-agent/dev/lib/*.so
 
 COPY --from=systemd-builder /work/systemd/src/systemd/ /usr/include/systemd/
 
