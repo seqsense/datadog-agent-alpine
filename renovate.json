@@ -4,13 +4,15 @@
   ],
   "regexManagers": [
     {
-      "fileMatch": ["^Dockerfile$"],
+      "fileMatch": [
+        "^Dockerfile$"
+      ],
       "matchStrings": [
         "^ARG DATADOG_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s"
       ],
       "datasourceTemplate": "github-tag",
       "depNameTemplate": "DataDog/datadog-agent",
       "versioningTemplate": "semver"
-   }
+    }
   ]
 }
