@@ -21,9 +21,9 @@ RUN apk add --no-cache \
     util-linux-dev \
     xz-dev
 
-ARG SYSTEMD_VERSION=v245.6
-ARG SYSTEMD_LIB_VERSION=0.28.0
-ARG OPENEMBEDDED_CORE_SHA=63bbff61b78c651339c4b18d8376187379ec3b3c
+ARG SYSTEMD_VERSION=v246.6
+ARG SYSTEMD_LIB_VERSION=0.29.0
+ARG OPENEMBEDDED_CORE_SHA=3325992e66e8fbd80292beb4b0ffd50beca138d8
 
 ENV CFLAGS=-Os
 WORKDIR /work/systemd
@@ -46,7 +46,7 @@ RUN strip -s /usr/local/lib/libsystemd*.so
 
 
 # ===========================
-FROM golang:1.14-alpine3.12 AS agent-builder
+FROM golang:1.15-alpine3.12 AS agent-builder
 
 RUN apk add --no-cache \
     ca-certificates \
@@ -71,21 +71,16 @@ RUN apk add --no-cache \
     invoke==1.4.1 \
     reno==3.1.0
 
-ARG DATADOG_VERSION=7.22.0
+ARG DATADOG_VERSION=7.24.1
 RUN git clone -b ${DATADOG_VERSION} --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent
 
 WORKDIR /build/datadog-agent
 
-COPY 00-fix-deps.patch /build/
-RUN patch -p1 < /build/00-fix-deps.patch
 RUN invoke deps
 
 ENV CGO_CFLAGS="-Os -I/build/datadog-agent/dev/include" \
   CGO_LDFLAGS="-L/build/datadog-agent/dev/lib" \
   GOFLAGS="-ldflags=-w -ldflags=-s"
-
-COPY 01-fix-non-posix-ext.patch /build/
-RUN patch -p1 < /build/01-fix-non-posix-ext.patch
 
 RUN invoke rtloader.make \
     --python-runtimes=3 \
@@ -128,8 +123,6 @@ RUN if [ ${ENABLE_TRACE_AGENT} -eq 1 ]; then \
   fi
 
 ARG ENABLE_SYSTEM_PROBE=0
-COPY 02-bpf-disable-stack-protector.patch /build/
-RUN patch -p1 < /build/02-bpf-disable-stack-protector.patch
 RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
     apk add --no-cache \
       bcc-dev \
@@ -182,7 +175,7 @@ FROM alpine:3.12 AS datadog-agent
 
 ARG ENABLE_SYSTEM_PROBE=1
 
-RUN echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
+RUN echo "@edge http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
   && apk add \
     bash \
     ca-certificates \
@@ -204,7 +197,7 @@ RUN echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/ap
     py3-yaml \
     python3 \
     s6 \
-    s6-overlay@testing \
+    s6-overlay@edge \
     xz \
   && if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
       apk add --no-cache \
@@ -220,7 +213,7 @@ RUN echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/ap
     binary \
     docker==3.7.3 \
   && apk del .build-deps \
-  && sed '/^@testing /d' -i /etc/apk/repositories \
+  && sed '/^@edge /d' -i /etc/apk/repositories \
   && rm -f /var/cache/apk/* \
   && find /usr -name "*.pyc" -delete \
   && find /usr -name "__pycache__" -delete
