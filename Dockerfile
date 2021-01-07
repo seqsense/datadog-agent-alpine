@@ -72,7 +72,7 @@ RUN apk add --no-cache \
     reno==3.1.0
 
 ARG DATADOG_VERSION=7.24.1
-RUN git clone -b ${DATADOG_VERSION} --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent
+RUN git clone -b ${DATADOG_VERSION} https://github.com/DataDog/datadog-agent.git /build/datadog-agent
 
 WORKDIR /build/datadog-agent
 
