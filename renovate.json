@@ -1,0 +1,18 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": [
+        "^Dockerfile$"
+      ],
+      "matchStrings": [
+        "^ARG DATADOG_VERSION=(?<currentValue>.*)$"
+      ],
+      "datasourceTemplate": "github-tag",
+      "depNameTemplate": "DataDog/datadog-agent",
+      "versioningTemplate": "semver"
+    }
+  ]
+}
