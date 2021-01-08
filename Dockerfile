@@ -265,7 +265,7 @@ ARG INTEGRATIONS_CORE="\
   system_core \
   system_swap"
 
-ARG DATADOG_VERSION=7.22.0
+ARG DATADOG_VERSION=7.24.1
 RUN apk add --force-broken-world --virtual .build-deps git \
   && git clone --depth=1 -b ${DATADOG_VERSION} https://github.com/DataDog/integrations-core.git /tmp/integrations-core \
   && cd /tmp/integrations-core \
