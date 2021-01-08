@@ -8,7 +8,7 @@
         "^Dockerfile$"
       ],
       "matchStrings": [
-        "^ARG DATADOG_VERSION=(?<currentValue>.*?)$"
+        "ARG DATADOG_VERSION=(?<currentValue>.*)"
       ],
       "datasourceTemplate": "github-tags",
       "depNameTemplate": "DataDog/datadog-agent",
