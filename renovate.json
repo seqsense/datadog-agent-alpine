@@ -10,7 +10,7 @@
       "matchStrings": [
         "^ARG DATADOG_VERSION=(?<currentValue>.*?)$"
       ],
-      "datasourceTemplate": "github-tag",
+      "datasourceTemplate": "github-tags",
       "depNameTemplate": "DataDog/datadog-agent",
       "versioningTemplate": "semver"
     }
