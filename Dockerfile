@@ -71,7 +71,7 @@ RUN apk add --no-cache \
     invoke==1.4.1 \
     reno==3.1.0
 
-ARG DATADOG_VERSION=7.24.1
+ARG DATADOG_VERSION=7.25.0
 # datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
 RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent \
   && cd /build/datadog-agent \
