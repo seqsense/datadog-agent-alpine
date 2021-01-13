@@ -44,6 +44,9 @@ jobs:
             ENABLE_SECURITY_AGENT=${SECURITY_AGENT} \
             ENABLE_TRACE_AGENT=${TRACE_AGENT} \
             ENABLE_SYSTEM_PROBE=${SYSTEM_PROBE}
+      - name: Get image tag
+        id: full-tag
+        run: make show-image-full-tag
 
       - name: Login to GitHub Container Registry
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
@@ -62,6 +65,6 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}
           docker tag \
             ${{ steps.tag.outputs.tag }} \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.full_tag }}
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}
           docker push \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.full_tag }}
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}
