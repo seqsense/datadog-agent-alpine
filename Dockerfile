@@ -72,7 +72,11 @@ RUN apk add --no-cache \
     reno==3.1.0
 
 ARG DATADOG_VERSION=7.24.1
-RUN git clone -b ${DATADOG_VERSION} https://github.com/DataDog/datadog-agent.git /build/datadog-agent
+# datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
+RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent \
+  && cd /build/datadog-agent \
+  && git fetch --depth=1 origin refs/tags/${DATADOG_VERSION}:refs/tags/${DATADOG_VERSION} \
+  && git checkout refs/tags/${DATADOG_VERSION}
 
 WORKDIR /build/datadog-agent
 
@@ -265,10 +269,12 @@ ARG INTEGRATIONS_CORE="\
   system_core \
   system_swap"
 
-ARG DATADOG_VERSION=7.24.1
+ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.24.0
 RUN apk add --force-broken-world --virtual .build-deps git \
-  && git clone --depth=1 -b ${DATADOG_VERSION} https://github.com/DataDog/integrations-core.git /tmp/integrations-core \
+  && git clone --depth=1 https://github.com/DataDog/integrations-core.git /tmp/integrations-core \
   && cd /tmp/integrations-core \
+  && git fetch --depth=1 origin refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION}:refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
+  && git checkout refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
   && python3 -m pip install \
     ./datadog_checks_base \
     $(echo ${INTEGRATIONS_CORE} | xargs -n1 echo | sed 's|^|./|') \
