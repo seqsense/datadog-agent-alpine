@@ -13,6 +13,17 @@
       "datasourceTemplate": "github-tags",
       "depNameTemplate": "DataDog/datadog-agent",
       "versioningTemplate": "semver"
+    },
+    {
+      "fileMatch": [
+        "^Dockerfile$"
+      ],
+      "matchStrings": [
+        "ARG DATADOG_INTEGRATIONS_CORE_VERSION=(?<currentValue>.*)"
+      ],
+      "datasourceTemplate": "github-tags",
+      "depNameTemplate": "DataDog/integrations-core",
+      "versioningTemplate": "semver"
     }
   ]
 }
