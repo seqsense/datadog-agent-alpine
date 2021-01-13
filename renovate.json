@@ -25,5 +25,14 @@
       "depNameTemplate": "DataDog/integrations-core",
       "versioningTemplate": "semver"
     }
+  ],
+  "packageRules": [
+    {
+      "groupName": "datadog packages",
+      "groupSlug": "datadog",
+      "packagePatterns": [
+        "^DataDog/*"
+      ]
+    }
   ]
 }
