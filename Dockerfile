@@ -179,9 +179,7 @@ FROM alpine:3.13 AS datadog-agent
 
 ARG ENABLE_SYSTEM_PROBE=1
 
-RUN echo "@v3.13 http://dl-cdn.alpinelinux.org/alpine/v3.13/main" >> /etc/apk/repositories \
-  && echo "@v3.13 http://dl-cdn.alpinelinux.org/alpine/v3.13/community" >> /etc/apk/repositories \
-  && apk add \
+RUN apk add \
     bash \
     ca-certificates \
     coreutils \
@@ -202,7 +200,7 @@ RUN echo "@v3.13 http://dl-cdn.alpinelinux.org/alpine/v3.13/main" >> /etc/apk/re
     py3-yaml \
     python3 \
     s6 \
-    s6-overlay@v3.13 \
+    s6-overlay \
     xz \
   && if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
       apk add --no-cache \
@@ -233,7 +231,7 @@ RUN mkdir -p \
   && touch /opt/datadog-agent/final_constraints-py3.txt \
   && ln -s /usr /opt/datadog-agent/embedded
 
-COPY --from=systemd-builder /usr/local/lib/libsystemd* /usr/lib/
+COPY --from=systemd-builder /usr/local/lib/libsystemd.so* /usr/lib/
 
 # Install datadog agent
 COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/s6-services /etc/services.d/
