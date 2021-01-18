@@ -61,7 +61,10 @@ RUN apk add --no-cache \
     musl-dev \
     patch \
     py3-pip \
+    py3-requests \
+    py3-toml \
     py3-wheel \
+    py3-yaml \
     python3-dev
 
 ARG DATADOG_VERSION=7.24.1
@@ -73,7 +76,14 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
 
 WORKDIR /build/datadog-agent
 
-RUN python3 -m pip install -r requirements.txt
+RUN for d in \
+      PyYAML \
+      requests \
+      toml \
+    ; do \
+      sed "/^$d=/d" -i requirements.txt; \
+    done \
+  && python3 -m pip install -r requirements.txt
 RUN invoke deps
 
 ENV CGO_CFLAGS="-Os -I/build/datadog-agent/dev/include" \
@@ -187,7 +197,12 @@ RUN echo "@v3.13 http://dl-cdn.alpinelinux.org/alpine/v3.13/main" >> /etc/apk/re
     libstdc++ \
     lz4-libs \
     py3-pip \
+    py3-prometheus-client \
+    py3-psutil \
+    py3-requests \
+    py3-requests-toolbelt \
     py3-wheel \
+    py3-yaml \
     python3 \
     s6 \
     s6-overlay@v3.13 \
@@ -260,6 +275,14 @@ RUN apk add --force-broken-world --virtual .build-deps git \
   && cd /tmp/integrations-core \
   && git fetch --depth=1 origin refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION}:refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
   && git checkout refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
+  && for d in \
+      PyYAML  \
+      requests \
+      requests_toolbelt \
+      prometheus-client \
+    ; do \
+      sed "/^$d=/d" -i datadog_checks_base/requirements.in; \
+    done \
   && python3 -m pip install \
     "./datadog_checks_base[deps, http]" \
     $(echo ${INTEGRATIONS_CORE} | xargs -n1 echo | sed 's|^|./|') \
