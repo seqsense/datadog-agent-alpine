@@ -40,9 +40,9 @@ RUN ./configure \
     -Didn=false \
     -Dutmp=false
 RUN ninja -C build libsystemd.so.${SYSTEMD_LIB_VERSION}
-RUN cp build/libsystemd* /usr/local/lib/
+RUN cp $(find build -name "libsystemd.so*" -type f) /usr/local/lib/
 
-RUN strip -s /usr/local/lib/libsystemd*.so
+RUN strip -s /usr/local/lib/libsystemd.so*
 
 
 # ===========================
