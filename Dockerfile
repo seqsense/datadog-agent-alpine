@@ -179,7 +179,8 @@ FROM alpine:3.12 AS datadog-agent
 
 ARG ENABLE_SYSTEM_PROBE=1
 
-RUN echo "@edge http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
+RUN echo "@v3.13 http://dl-cdn.alpinelinux.org/alpine/v3.13/main" >> /etc/apk/repositories \
+  && echo "@v3.13 http://dl-cdn.alpinelinux.org/alpine/v3.13/community" >> /etc/apk/repositories \
   && apk add \
     bash \
     ca-certificates \
@@ -201,7 +202,7 @@ RUN echo "@edge http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk
     py3-yaml \
     python3 \
     s6 \
-    s6-overlay@edge \
+    s6-overlay@v3.13 \
     xz \
   && if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
       apk add --no-cache \
