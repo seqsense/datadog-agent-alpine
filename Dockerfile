@@ -272,9 +272,9 @@ ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.24.0
 RUN apk add --force-broken-world --virtual .build-deps \
     gcc \
     git \
+    krb5-dev \
     musl-dev \
     python3-dev \
-  && apk del .build-deps \
   && git clone --depth=1 https://github.com/DataDog/integrations-core.git /tmp/integrations-core \
   && cd /tmp/integrations-core \
   && git fetch --depth=1 origin refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION}:refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
