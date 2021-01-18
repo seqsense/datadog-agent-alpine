@@ -196,11 +196,15 @@ RUN echo "@v3.13 http://dl-cdn.alpinelinux.org/alpine/v3.13/main" >> /etc/apk/re
     libseccomp \
     libstdc++ \
     lz4-libs \
+    py3-cryptography \
     py3-pip \
     py3-prometheus-client \
+    py3-protobuf \
     py3-psutil \
+    py3-pysocks \
     py3-requests \
     py3-requests-toolbelt \
+    py3-six \
     py3-wheel \
     py3-yaml \
     python3 \
@@ -212,11 +216,6 @@ RUN echo "@v3.13 http://dl-cdn.alpinelinux.org/alpine/v3.13/main" >> /etc/apk/re
         bcc \
         libbpf; \
     fi \
-  && apk add --virtual .build-deps \
-    gcc \
-    musl-dev \
-    python3-dev \
-  && apk del .build-deps \
   && sed '/^@edge /d' -i /etc/apk/repositories \
   && rm -f /var/cache/apk/* \
   && find /usr -name "*.pyc" -delete \
@@ -270,16 +269,25 @@ ARG INTEGRATIONS_CORE="\
   system_swap"
 
 ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.24.0
-RUN apk add --force-broken-world --virtual .build-deps git \
+RUN apk add --force-broken-world --virtual .build-deps \
+    gcc \
+    git \
+    musl-dev \
+    python3-dev \
+  && apk del .build-deps \
   && git clone --depth=1 https://github.com/DataDog/integrations-core.git /tmp/integrations-core \
   && cd /tmp/integrations-core \
   && git fetch --depth=1 origin refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION}:refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
   && git checkout refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
   && for d in \
-      PyYAML  \
+      PyYAML \
+      cryptography \
+      prometheus-client \
+      protobuf \
+      pysocks \
       requests \
       requests_toolbelt \
-      prometheus-client \
+      six \
     ; do \
       sed "/^$d=/d" -i datadog_checks_base/requirements.in; \
     done \
