@@ -65,11 +65,7 @@ RUN apk add --no-cache \
     py3-toml \
     py3-wheel \
     py3-yaml \
-    python3-dev \
-  && python3 -m pip install \
-    docker==3.7.3 \
-    invoke==1.4.1 \
-    reno==3.1.0
+    python3-dev
 
 ARG DATADOG_VERSION=7.24.1
 # datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
@@ -80,6 +76,14 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
 
 WORKDIR /build/datadog-agent
 
+RUN for d in \
+      PyYAML \
+      requests \
+      toml \
+    ; do \
+      sed "/^$d=/d" -i requirements.txt; \
+    done \
+  && python3 -m pip install -r requirements.txt
 RUN invoke deps
 
 ENV CGO_CFLAGS="-Os -I/build/datadog-agent/dev/include" \
@@ -190,12 +194,15 @@ RUN apk add \
     libseccomp \
     libstdc++ \
     lz4-libs \
+    py3-cryptography \
     py3-pip \
     py3-prometheus-client \
+    py3-protobuf \
     py3-psutil \
+    py3-pysocks \
     py3-requests \
     py3-requests-toolbelt \
-    py3-toml \
+    py3-six \
     py3-wheel \
     py3-yaml \
     python3 \
@@ -205,15 +212,6 @@ RUN apk add \
         bcc \
         libbpf; \
     fi \
-  && apk add --virtual .build-deps \
-    gcc \
-    musl-dev \
-    python3-dev \
-  && python3 -m pip install \
-    # binary is used by datadog_checks.base but not specified as a dependency \
-    binary \
-    docker==3.7.3 \
-  && apk del .build-deps \
   && rm -f /var/cache/apk/* \
   && find /usr -name "*.pyc" -delete \
   && find /usr -name "__pycache__" -delete
@@ -271,13 +269,30 @@ ARG INTEGRATIONS_CORE="\
   system_swap"
 
 ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.24.0
-RUN apk add --force-broken-world --virtual .build-deps git \
+RUN apk add --force-broken-world --virtual .build-deps \
+    gcc \
+    git \
+    krb5-dev \
+    musl-dev \
+    python3-dev \
   && git clone --depth=1 https://github.com/DataDog/integrations-core.git /tmp/integrations-core \
   && cd /tmp/integrations-core \
   && git fetch --depth=1 origin refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION}:refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
   && git checkout refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
+  && for d in \
+      PyYAML \
+      cryptography \
+      prometheus-client \
+      protobuf \
+      pysocks \
+      requests \
+      requests_toolbelt \
+      six \
+    ; do \
+      sed "/^$d=/d" -i datadog_checks_base/requirements.in; \
+    done \
   && python3 -m pip install \
-    ./datadog_checks_base \
+    "./datadog_checks_base[deps, http]" \
     $(echo ${INTEGRATIONS_CORE} | xargs -n1 echo | sed 's|^|./|') \
   && apk del --force-broken-world .build-deps \
   && cd / && rm -rf /tmp/integrations-core \
