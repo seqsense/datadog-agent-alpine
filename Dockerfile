@@ -61,15 +61,8 @@ RUN apk add --no-cache \
     musl-dev \
     patch \
     py3-pip \
-    py3-requests \
-    py3-toml \
     py3-wheel \
-    py3-yaml \
-    python3-dev \
-  && python3 -m pip install \
-    docker==3.7.3 \
-    invoke==1.4.1 \
-    reno==3.1.0
+    python3-dev
 
 ARG DATADOG_VERSION=7.24.1
 # datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
@@ -80,6 +73,7 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
 
 WORKDIR /build/datadog-agent
 
+RUN python3 -m pip install -r requirements.txt
 RUN invoke deps
 
 ENV CGO_CFLAGS="-Os -I/build/datadog-agent/dev/include" \
@@ -193,13 +187,7 @@ RUN echo "@v3.13 http://dl-cdn.alpinelinux.org/alpine/v3.13/main" >> /etc/apk/re
     libstdc++ \
     lz4-libs \
     py3-pip \
-    py3-prometheus-client \
-    py3-psutil \
-    py3-requests \
-    py3-requests-toolbelt \
-    py3-toml \
     py3-wheel \
-    py3-yaml \
     python3 \
     s6 \
     s6-overlay@v3.13 \
@@ -213,10 +201,6 @@ RUN echo "@v3.13 http://dl-cdn.alpinelinux.org/alpine/v3.13/main" >> /etc/apk/re
     gcc \
     musl-dev \
     python3-dev \
-  && python3 -m pip install \
-    # binary is used by datadog_checks.base but not specified as a dependency \
-    binary \
-    docker==3.7.3 \
   && apk del .build-deps \
   && sed '/^@edge /d' -i /etc/apk/repositories \
   && rm -f /var/cache/apk/* \
@@ -277,7 +261,7 @@ RUN apk add --force-broken-world --virtual .build-deps git \
   && git fetch --depth=1 origin refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION}:refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
   && git checkout refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
   && python3 -m pip install \
-    ./datadog_checks_base \
+    "./datadog_checks_base[deps, http]" \
     $(echo ${INTEGRATIONS_CORE} | xargs -n1 echo | sed 's|^|./|') \
   && apk del --force-broken-world .build-deps \
   && cd / && rm -rf /tmp/integrations-core \
