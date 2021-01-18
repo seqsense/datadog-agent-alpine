@@ -199,8 +199,6 @@ RUN apk add \
     py3-wheel \
     py3-yaml \
     python3 \
-    s6 \
-    s6-overlay \
     xz \
   && if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
       apk add --no-cache \
@@ -216,10 +214,14 @@ RUN apk add \
     binary \
     docker==3.7.3 \
   && apk del .build-deps \
-  && sed '/^@edge /d' -i /etc/apk/repositories \
   && rm -f /var/cache/apk/* \
   && find /usr -name "*.pyc" -delete \
   && find /usr -name "__pycache__" -delete
+
+ARG S6_OVERLAY_VERSION=2.1.0.2
+RUN wget https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-amd64.tar.gz \
+  && tar xzf /s6-overlay-amd64.tar.gz \
+  && rm /s6-overlay-amd64.tar.gz
 
 RUN mkdir -p \
     /checks.d \

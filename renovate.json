@@ -25,6 +25,18 @@
       "depNameTemplate": "DataDog/integrations-core",
       "versioningTemplate": "semver",
       "lookupNameTemplate": "https://github.com/DataDog/integrations-core.git"
+    },
+    {
+      "fileMatch": [
+        "^Dockerfile$"
+      ],
+      "matchStrings": [
+        "ARG S6_OVERLAY_VERSION=(?<currentValue>.*)"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "just-containers/s6-overlay",
+      "versioningTemplate": "loose",
+      "lookupNameTemplate": "https://github.com/just-containers/s6-overlay.git"
     }
   ],
   "packageRules": [
