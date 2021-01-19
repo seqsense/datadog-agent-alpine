@@ -20,6 +20,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Setup environment variables
+        run: |
+          echo ${{ matrix.enable }} \
+            | xargs -n1 echo \
+            | xargs -n1 -I{} echo ENABLE_{} >> ${GITHUB_ENV}
       - name: Get image tag
         id: tag
         run: make show-image-tag
@@ -36,14 +41,7 @@ jobs:
         id: build
         env:
           BUILD_OPTS: "--cache-from ${{ steps.tag.outputs.tag }} --pull"
-        run: |
-          eval ${{ matrix.enable }}
-          make docker-build \
-            BUILD_OPTS="${BUILD_OPTS}" \
-            ENABLE_PROCESS_AGENT=${PROCESS_AGENT} \
-            ENABLE_SECURITY_AGENT=${SECURITY_AGENT} \
-            ENABLE_TRACE_AGENT=${TRACE_AGENT} \
-            ENABLE_SYSTEM_PROBE=${SYSTEM_PROBE}
+        run: make docker-build BUILD_OPTS="${BUILD_OPTS}"
       - name: Get image tag
         id: full-tag
         run: make show-image-full-tag
@@ -60,11 +58,11 @@ jobs:
         run: |
           docker tag \
             ${{ steps.tag.outputs.tag }} \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}
           docker push \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}
           docker tag \
             ${{ steps.tag.outputs.tag }} \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}
+            ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}
           docker push \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}
+            ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}
