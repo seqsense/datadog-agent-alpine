@@ -44,4 +44,4 @@ show-image-tag:
 
 .PHONY: show-image-full-tag
 show-image-full-tag:
-	@echo "::set-output name=full_tag::$(NAME):$$(docker run --rm --entrypoint /opt/datadog-agent/bin/agent/agent datadog-agent:7-alpine version -n | cut -f2 -d" ")$(TAG_SUFFIX)"
+	@echo "::set-output name=full_tag::$(NAME):$$(docker run --rm --entrypoint /opt/datadog-agent/bin/agent/agent $(NAME):$(TAG) version -n | cut -f2 -d" ")$(TAG_SUFFIX)"
