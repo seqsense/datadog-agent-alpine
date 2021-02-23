@@ -1,4 +1,4 @@
-FROM alpine:3.12 as systemd-builder
+FROM alpine:3.13 as systemd-builder
 
 RUN apk add --no-cache \
     autoconf \
@@ -40,13 +40,13 @@ RUN ./configure \
     -Didn=false \
     -Dutmp=false
 RUN ninja -C build libsystemd.so.${SYSTEMD_LIB_VERSION}
-RUN cp build/libsystemd* /usr/local/lib/
+RUN cp -v $(find build -name "libsystemd.so*" -type f) /usr/local/lib/
 
-RUN strip -s /usr/local/lib/libsystemd*.so
+RUN strip -s /usr/local/lib/libsystemd.so*
 
 
 # ===========================
-FROM golang:1.15-alpine3.12 AS agent-builder
+FROM golang:1.16-alpine3.13 AS agent-builder
 
 RUN apk add --no-cache \
     ca-certificates \
@@ -135,10 +135,19 @@ RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
     apk add --no-cache \
       bcc-dev \
       clang \
+      clang-dev \
+      clang-static \
       linux-virt-dev \
       linux-headers \
       libbpf-dev \
-      llvm10; \
+      llvm10 \
+      llvm10-dev \
+      llvm10-static; \
+    ln -s /usr/include/llvm10/llvm /usr/include/; \
+    ln -s /usr/include/llvm10/llvm-c /usr/include/; \
+    for l in /usr/lib/llvm10/lib/*.a; do \
+      ln -s $l /usr/lib/; \
+    done; \
     invoke system-probe.build \
       --python-runtimes=3; \
     mv bin/system-probe/system-probe /agent-bin/; \
@@ -179,7 +188,7 @@ RUN rm -rf \
 
 
 # ===========================
-FROM alpine:3.12 AS datadog-agent
+FROM alpine:3.13 AS datadog-agent
 
 ARG ENABLE_SYSTEM_PROBE=1
 
