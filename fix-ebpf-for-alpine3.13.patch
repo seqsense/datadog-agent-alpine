@@ -1,0 +1,94 @@
+diff --git a/go.mod b/go.mod
+index e16ba1cd0..cd5f4ae58 100644
+--- a/go.mod
++++ b/go.mod
+@@ -10,7 +10,7 @@ replace (
+ 	github.com/coreos/go-systemd => github.com/coreos/go-systemd v0.0.0-20180202092358-40e2722dffea
+ 	github.com/docker/distribution => github.com/docker/distribution v2.7.1-0.20190104202606-0ac367fd6bee+incompatible
+ 	github.com/florianl/go-conntrack => github.com/florianl/go-conntrack v0.2.0
+-	github.com/iovisor/gobpf => github.com/DataDog/gobpf v0.0.0-20200907093925-5f8313cb4d71
++	github.com/iovisor/gobpf => github.com/at-wat/gobpf v0.0.0-20210223150157-eae1f47bd678
+ 	github.com/lxn/walk => github.com/lxn/walk v0.0.0-20180521183810-02935bac0ab8
+ 	github.com/mholt/archiver => github.com/mholt/archiver v2.0.1-0.20171012052341-26cf5bb32d07+incompatible
+ 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v0.9.2
+diff --git a/go.sum b/go.sum
+index 33556f56d..57afbbd1c 100644
+--- a/go.sum
++++ b/go.sum
+@@ -95,8 +95,6 @@ github.com/DataDog/datadog-operator v0.2.1-0.20200709152311-9c71245c6822 h1:E5WN
+ github.com/DataDog/datadog-operator v0.2.1-0.20200709152311-9c71245c6822/go.mod h1:a5NqgPglcSct+NwO9gPvVhoL5V6G1+gHbRaRnU8U54M=
+ github.com/DataDog/ebpf v0.0.0-20210121152636-7fc17cac5ed7 h1:Gl1fG+QK2tVnxTwtuqraUymTfjMGPMOPjfogRs7vpdA=
+ github.com/DataDog/ebpf v0.0.0-20210121152636-7fc17cac5ed7/go.mod h1:VSpIdBT/hwSbP3xKa5eYtiiBN2E37YePfTuyQVzSSig=
+-github.com/DataDog/gobpf v0.0.0-20200907093925-5f8313cb4d71 h1:0TOAH3X9tEvMBVQ1HYrQfrnAUcSS1mfMrhqeN+spV1s=
+-github.com/DataDog/gobpf v0.0.0-20200907093925-5f8313cb4d71/go.mod h1:rNvi5cSHdpxN6495MOYAWN3yukac8lORoluL+9Osrsw=
+ github.com/DataDog/gohai v0.0.0-20200605003749-e17d616e422a h1:BkU6uq4Ib7Kp1zP7MT33IdHZQazC+kxbuTyEmgePyyA=
+ github.com/DataDog/gohai v0.0.0-20200605003749-e17d616e422a/go.mod h1:cJ+uBTR3AWclJPX7R9nRwDQB5R2HXWTrb6L4Ts4wwcw=
+ github.com/DataDog/gopsutil v0.0.0-20200624212600-1b53412ef321 h1:OPAXA+r6yznoxWR5jQ2iTh5CvzIMrdw8AU0uFN2RwEw=
+@@ -189,6 +187,8 @@ github.com/aryann/difflib v0.0.0-20170710044230-e206f873d14a/go.mod h1:DAHtR1m6l
+ github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf/go.mod h1:lB+ZfQJz7igIIfQNfa7Ml4HSf2uFQQRzpGGRXenZAgY=
+ github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a/go.mod h1:lB+ZfQJz7igIIfQNfa7Ml4HSf2uFQQRzpGGRXenZAgY=
+ github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496/go.mod h1:oGkLhpf+kjZl6xBf758TQhh5XrAeiJv/7FRz/2spLIg=
++github.com/at-wat/gobpf v0.0.0-20210223150157-eae1f47bd678 h1:RMO03nT7Gp2hZw9ibALh0Q4vQ8xu+UYNtWiGNUzbq94=
++github.com/at-wat/gobpf v0.0.0-20210223150157-eae1f47bd678/go.mod h1:0I0WFKHWKaWWlXP3b3OLDfIAEUVq6PCDbOcE0WEDQRw=
+ github.com/auth0/go-jwt-middleware v0.0.0-20170425171159-5493cabe49f7/go.mod h1:LWMyo4iOLWXHGdBki7NIht1kHru/0wM179h+d3g8ATM=
+ github.com/avast/retry-go v2.7.0+incompatible h1:XaGnzl7gESAideSjr+I8Hki/JBi+Yb9baHlMRPeSC84=
+ github.com/avast/retry-go v2.7.0+incompatible/go.mod h1:XtSnn+n/sHqQIpZ10K1qAevBhOOCWBLXXy3hyiqqBrY=
+@@ -990,7 +990,6 @@ github.com/mailru/easyjson v0.0.0-20160728113105-d5b7844b561a/go.mod h1:C1wdFJiN
+ github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
+ github.com/mailru/easyjson v0.0.0-20190312143242-1de009706dbe/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
+ github.com/mailru/easyjson v0.0.0-20190614124828-94de47d64c63/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
+-github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e h1:hB2xlXdHp/pmPZq0y3QnmWAArdw9PqbmotexnWx/FU8=
+ github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
+ github.com/mailru/easyjson v0.7.6 h1:8yTIVnZgCoiM1TgqoeTl+LfU5Jg6/xL3QhGQnimLYnA=
+ github.com/mailru/easyjson v0.7.6/go.mod h1:xzfreul335JAWq5oZzymOObrkdz5UnU4kGfJJLY9Nlc=
+@@ -1968,7 +1967,6 @@ gopkg.in/zorkian/go-datadog-api.v2 v2.29.0/go.mod h1:kx0CSMRpzEZfx/nFH62GLU4stZj
+ gotest.tools v2.1.0+incompatible/go.mod h1:DsYFclhRJ6vuDpmuTbkuFWG+y2sxOXAzmJt81HFBacw=
+ gotest.tools v2.2.0+incompatible h1:VsBPFP1AI068pPrMxtb/S8Zkgf9xEmTLJjfM+P5UIEo=
+ gotest.tools v2.2.0+incompatible/go.mod h1:DsYFclhRJ6vuDpmuTbkuFWG+y2sxOXAzmJt81HFBacw=
+-gotest.tools/gotestsum v0.3.5 h1:VePOWRsuWFYpfp/G8mbmOZKxO5T3501SEGQRUdvq7h0=
+ gotest.tools/gotestsum v0.3.5/go.mod h1:Mnf3e5FUzXbkCfynWBGOwLssY7gTQgCHObK9tMpAriY=
+ gotest.tools/gotestsum v0.5.3 h1:9SkwB5ou8GYUqSgbCCYCMk9BVXueDmzwk5WjaZeZW2o=
+ gotest.tools/gotestsum v0.5.3/go.mod h1:hC9TQserDVTWcJuARh76Ydp3ZwuE+pIIWpt2BzDLD6M=
+diff --git a/omnibus/config/software/libbcc_compat.patch b/omnibus/config/software/libbcc_compat.patch
+index afe078ae0..369213a94 100644
+--- a/omnibus/config/software/libbcc_compat.patch
++++ b/omnibus/config/software/libbcc_compat.patch
+@@ -97,7 +97,7 @@ index c53c542..8244f77 100644
+ 
+  # Link against LLVM libraries
+ -target_link_libraries(bcc-shared ${bcc_common_libs_for_s})
+-+target_link_libraries(bcc-shared ${bcc_common_libs_for_s} -Wl,--wrap=exp -Wl,--wrap=log -Wl,--wrap=pow -Wl,--wrap=exp2 -Wl,--wrap=log2)
+++target_link_libraries(bcc-shared ${bcc_common_libs_for_s})
+  target_link_libraries(bcc-static ${bcc_common_libs_for_a} bcc-loader-static)
+  set(bcc-lua-static ${bcc-lua-static} ${bcc_common_libs_for_lua})
+ 
+diff --git a/pkg/ebpf/compiler/compiler.go b/pkg/ebpf/compiler/compiler.go
+index 804fee14e..1acad984c 100644
+--- a/pkg/ebpf/compiler/compiler.go
++++ b/pkg/ebpf/compiler/compiler.go
+@@ -7,7 +7,6 @@ package compiler
+ #cgo LDFLAGS: -L/opt/datadog-agent/embedded/lib
+ #cgo LDFLAGS: -lLLVMXRay -lLLVMWindowsManifest -lLLVMTableGen -lLLVMSymbolize -lLLVMDebugInfoPDB -lLLVMOrcJIT -lLLVMOrcError -lLLVMJITLink -lLLVMObjectYAML -lLLVMMIRParser -lLLVMMCJIT -lLLVMMCA -lLLVMLTO -lLLVMPasses -lLLVMCoroutines -lLLVMObjCARCOpts -lLLVMipo -lLLVMInstrumentation -lLLVMVectorize -lLLVMLinker -lLLVMIRReader -lLLVMAsmParser -lLLVMFrontendOpenMP -lLLVMExtensions -lLLVMLineEditor -lLLVMLibDriver -lLLVMGlobalISel -lLLVMFuzzMutate -lLLVMInterpreter -lLLVMExecutionEngine -lLLVMRuntimeDyld -lLLVMDWARFLinker -lLLVMDlltoolDriver -lLLVMOption -lLLVMDebugInfoGSYM -lLLVMCoverage -lLLVMCFGuard -lLLVMBPFDisassembler -lLLVMMCDisassembler -lLLVMBPFCodeGen -lLLVMSelectionDAG -lLLVMAsmPrinter -lLLVMDebugInfoDWARF -lLLVMCodeGen -lLLVMTarget -lLLVMScalarOpts -lLLVMInstCombine -lLLVMAggressiveInstCombine -lLLVMTransformUtils -lLLVMBitWriter -lLLVMAnalysis -lLLVMProfileData -lLLVMObject -lLLVMTextAPI -lLLVMBitReader -lLLVMCore -lLLVMRemarks -lLLVMBitstreamReader -lLLVMBPFAsmParser -lLLVMMCParser -lLLVMBPFDesc -lLLVMMC -lLLVMDebugInfoCodeView -lLLVMDebugInfoMSF -lLLVMBinaryFormat -lLLVMBPFInfo -lLLVMSupport -lLLVMDemangle
+ #cgo LDFLAGS: -lz -ldl -lm -lrt -static-libstdc++
+-#cgo LDFLAGS: -Wl,--wrap=exp -Wl,--wrap=log -Wl,--wrap=pow -Wl,--wrap=log2 -Wl,--wrap=log2f
+ #cgo CXXFLAGS: -I/opt/datadog-agent/embedded/include -std=c++14 -fno-exceptions -fno-rtti -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -DLLVM_MAJOR_VERSION=11
+ #cgo CPPFLAGS: -I/opt/datadog-agent/embedded/include -D_GNU_SOURCE -D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -DLLVM_MAJOR_VERSION=11
+ 
+diff --git a/pkg/ebpf/compiler/wrapper.h b/pkg/ebpf/compiler/wrapper.h
+index 31b00820c..51f1ae231 100644
+--- a/pkg/ebpf/compiler/wrapper.h
++++ b/pkg/ebpf/compiler/wrapper.h
+@@ -48,8 +48,8 @@ float __wrap_ ## func (float x) {                               \
+   return __ ## func ## _prior_glibc(x);                         \
+ }
+ 
+-symver_wrap_d1(exp)
+-symver_wrap_d1(log)
+-symver_wrap_d2(pow)
+-symver_wrap_d1(log2)
+-symver_wrap_f1(log2f)
++//symver_wrap_d1(exp)
++//symver_wrap_d1(log)
++//symver_wrap_d2(pow)
++//symver_wrap_d1(log2)
++//symver_wrap_f1(log2f)
