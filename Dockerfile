@@ -46,7 +46,7 @@ RUN strip -s /usr/local/lib/libsystemd.so*
 
 
 # ===========================
-FROM golang:1.15-alpine3.12 AS agent-builder
+FROM golang:1.16-alpine3.12 AS agent-builder
 
 RUN apk add --no-cache \
     ca-certificates \
