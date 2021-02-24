@@ -243,7 +243,7 @@ RUN mkdir -p \
   && touch /opt/datadog-agent/final_constraints-py3.txt \
   && ln -s /usr /opt/datadog-agent/embedded
 
-COPY --from=systemd-builder /usr/local/lib/libsystemd* /usr/lib/
+COPY --from=systemd-builder /usr/local/lib/libsystemd.so* /usr/lib/
 
 # Install datadog agent
 COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/s6-services /etc/services.d/
