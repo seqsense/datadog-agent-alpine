@@ -1,4 +1,4 @@
-FROM alpine:3.12 as systemd-builder
+FROM alpine:3.13 as systemd-builder
 
 RUN apk add --no-cache \
     autoconf \
@@ -40,9 +40,9 @@ RUN ./configure \
     -Didn=false \
     -Dutmp=false
 RUN ninja -C build libsystemd.so.${SYSTEMD_LIB_VERSION}
-RUN cp build/libsystemd* /usr/local/lib/
+RUN cp $(find build -name "libsystemd.so*" -type f) /usr/local/lib/
 
-RUN strip -s /usr/local/lib/libsystemd*.so
+RUN strip -s /usr/local/lib/libsystemd.so*
 
 
 # ===========================
@@ -179,7 +179,7 @@ RUN rm -rf \
 
 
 # ===========================
-FROM alpine:3.12 AS datadog-agent
+FROM alpine:3.13 AS datadog-agent
 
 ARG ENABLE_SYSTEM_PROBE=1
 
@@ -231,7 +231,7 @@ RUN mkdir -p \
   && touch /opt/datadog-agent/final_constraints-py3.txt \
   && ln -s /usr /opt/datadog-agent/embedded
 
-COPY --from=systemd-builder /usr/local/lib/libsystemd* /usr/lib/
+COPY --from=systemd-builder /usr/local/lib/libsystemd.so* /usr/lib/
 
 # Install datadog agent
 COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/s6-services /etc/services.d/
