@@ -49,46 +49,51 @@ index 33556f56d..57afbbd1c 100644
  gotest.tools/gotestsum v0.3.5/go.mod h1:Mnf3e5FUzXbkCfynWBGOwLssY7gTQgCHObK9tMpAriY=
  gotest.tools/gotestsum v0.5.3 h1:9SkwB5ou8GYUqSgbCCYCMk9BVXueDmzwk5WjaZeZW2o=
  gotest.tools/gotestsum v0.5.3/go.mod h1:hC9TQserDVTWcJuARh76Ydp3ZwuE+pIIWpt2BzDLD6M=
-diff --git a/omnibus/config/software/libbcc_compat.patch b/omnibus/config/software/libbcc_compat.patch
-index afe078ae0..369213a94 100644
---- a/omnibus/config/software/libbcc_compat.patch
-+++ b/omnibus/config/software/libbcc_compat.patch
-@@ -97,7 +97,7 @@ index c53c542..8244f77 100644
- 
-  # Link against LLVM libraries
- -target_link_libraries(bcc-shared ${bcc_common_libs_for_s})
--+target_link_libraries(bcc-shared ${bcc_common_libs_for_s} -Wl,--wrap=exp -Wl,--wrap=log -Wl,--wrap=pow -Wl,--wrap=exp2 -Wl,--wrap=log2)
-++target_link_libraries(bcc-shared ${bcc_common_libs_for_s})
-  target_link_libraries(bcc-static ${bcc_common_libs_for_a} bcc-loader-static)
-  set(bcc-lua-static ${bcc-lua-static} ${bcc_common_libs_for_lua})
- 
-diff --git a/pkg/ebpf/compiler/compiler.go b/pkg/ebpf/compiler/compiler.go
-index 804fee14e..1acad984c 100644
---- a/pkg/ebpf/compiler/compiler.go
-+++ b/pkg/ebpf/compiler/compiler.go
-@@ -7,7 +7,6 @@ package compiler
- #cgo LDFLAGS: -L/opt/datadog-agent/embedded/lib
- #cgo LDFLAGS: -lLLVMXRay -lLLVMWindowsManifest -lLLVMTableGen -lLLVMSymbolize -lLLVMDebugInfoPDB -lLLVMOrcJIT -lLLVMOrcError -lLLVMJITLink -lLLVMObjectYAML -lLLVMMIRParser -lLLVMMCJIT -lLLVMMCA -lLLVMLTO -lLLVMPasses -lLLVMCoroutines -lLLVMObjCARCOpts -lLLVMipo -lLLVMInstrumentation -lLLVMVectorize -lLLVMLinker -lLLVMIRReader -lLLVMAsmParser -lLLVMFrontendOpenMP -lLLVMExtensions -lLLVMLineEditor -lLLVMLibDriver -lLLVMGlobalISel -lLLVMFuzzMutate -lLLVMInterpreter -lLLVMExecutionEngine -lLLVMRuntimeDyld -lLLVMDWARFLinker -lLLVMDlltoolDriver -lLLVMOption -lLLVMDebugInfoGSYM -lLLVMCoverage -lLLVMCFGuard -lLLVMBPFDisassembler -lLLVMMCDisassembler -lLLVMBPFCodeGen -lLLVMSelectionDAG -lLLVMAsmPrinter -lLLVMDebugInfoDWARF -lLLVMCodeGen -lLLVMTarget -lLLVMScalarOpts -lLLVMInstCombine -lLLVMAggressiveInstCombine -lLLVMTransformUtils -lLLVMBitWriter -lLLVMAnalysis -lLLVMProfileData -lLLVMObject -lLLVMTextAPI -lLLVMBitReader -lLLVMCore -lLLVMRemarks -lLLVMBitstreamReader -lLLVMBPFAsmParser -lLLVMMCParser -lLLVMBPFDesc -lLLVMMC -lLLVMDebugInfoCodeView -lLLVMDebugInfoMSF -lLLVMBinaryFormat -lLLVMBPFInfo -lLLVMSupport -lLLVMDemangle
- #cgo LDFLAGS: -lz -ldl -lm -lrt -static-libstdc++
--#cgo LDFLAGS: -Wl,--wrap=exp -Wl,--wrap=log -Wl,--wrap=pow -Wl,--wrap=log2 -Wl,--wrap=log2f
- #cgo CXXFLAGS: -I/opt/datadog-agent/embedded/include -std=c++14 -fno-exceptions -fno-rtti -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -DLLVM_MAJOR_VERSION=11
- #cgo CPPFLAGS: -I/opt/datadog-agent/embedded/include -D_GNU_SOURCE -D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -DLLVM_MAJOR_VERSION=11
- 
 diff --git a/pkg/ebpf/compiler/wrapper.h b/pkg/ebpf/compiler/wrapper.h
-index 31b00820c..51f1ae231 100644
+index 31b00820c..f18ce3e14 100644
 --- a/pkg/ebpf/compiler/wrapper.h
 +++ b/pkg/ebpf/compiler/wrapper.h
-@@ -48,8 +48,8 @@ float __wrap_ ## func (float x) {                               \
+@@ -13,6 +13,8 @@ $ objdump -p bin/system-probe/system-probe
+ $ nm bin/system-probe/system-probe | grep GLIBC_X.XX
+ */
+ 
++#ifdef __GLIBC__
++
+ #ifdef __x86_64__
+ #define GLIBC_VERS "GLIBC_2.2.5"
+ #elif defined(__aarch64__)
+@@ -48,6 +50,34 @@ float __wrap_ ## func (float x) {                               \
    return __ ## func ## _prior_glibc(x);                         \
  }
- 
--symver_wrap_d1(exp)
--symver_wrap_d1(log)
--symver_wrap_d2(pow)
--symver_wrap_d1(log2)
--symver_wrap_f1(log2f)
-+//symver_wrap_d1(exp)
-+//symver_wrap_d1(log)
-+//symver_wrap_d2(pow)
-+//symver_wrap_d1(log2)
-+//symver_wrap_f1(log2f)
+
++#else
++
++// Use functions directly for non-GLIBC environments.
++
++#define symver_wrap_d1(func)                                    \
++double func(double x);                                          \
++                                                                \
++double __wrap_ ## func (double x) {                             \
++  return func(x);                                               \
++}
++
++#define symver_wrap_d2(func)                                    \
++double func(double x, double y);                                \
++                                                                \
++double __wrap_ ## func (double x, double y) {                   \
++  return func(x, y);                                            \
++}
++
++#define symver_wrap_f1(func)                                    \
++float func(float x);                                           \
++                                                                \
++float __wrap_ ## func (float x) {                               \
++  return func(x);                                               \
++}
++
++#endif
++
++
+ symver_wrap_d1(exp)
+ symver_wrap_d1(log)
+ symver_wrap_d2(pow)
