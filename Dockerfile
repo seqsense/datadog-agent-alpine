@@ -40,13 +40,13 @@ RUN ./configure \
     -Didn=false \
     -Dutmp=false
 RUN ninja -C build libsystemd.so.${SYSTEMD_LIB_VERSION}
-RUN cp $(find build -name "libsystemd.so*" -type f) /usr/local/lib/
+RUN cp -v $(find build -name "libsystemd.so*" -type f) /usr/local/lib/
 
 RUN strip -s /usr/local/lib/libsystemd.so*
 
 
 # ===========================
-FROM golang:1.15-alpine3.12 AS agent-builder
+FROM golang:1.16-alpine3.13 AS agent-builder
 
 RUN apk add --no-cache \
     ca-certificates \
@@ -67,7 +67,7 @@ RUN apk add --no-cache \
     py3-yaml \
     python3-dev
 
-ARG DATADOG_VERSION=7.24.1
+ARG DATADOG_VERSION=7.26.0
 # datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
 RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent \
   && cd /build/datadog-agent \
@@ -75,6 +75,9 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
   && git checkout refs/tags/${DATADOG_VERSION}
 
 WORKDIR /build/datadog-agent
+
+COPY fix-ebpf-for-alpine3.13.patch ./
+RUN patch -p1 < fix-ebpf-for-alpine3.13.patch
 
 RUN for d in \
       PyYAML \
@@ -135,10 +138,19 @@ RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
     apk add --no-cache \
       bcc-dev \
       clang \
+      clang-dev \
+      clang-static \
       linux-virt-dev \
       linux-headers \
       libbpf-dev \
-      llvm10; \
+      llvm10 \
+      llvm10-dev \
+      llvm10-static; \
+    ln -s /usr/include/llvm10/llvm /usr/include/; \
+    ln -s /usr/include/llvm10/llvm-c /usr/include/; \
+    for l in /usr/lib/llvm10/lib/*.a; do \
+      ln -s $l /usr/lib/; \
+    done; \
     invoke system-probe.build \
       --python-runtimes=3; \
     mv bin/system-probe/system-probe /agent-bin/; \
@@ -268,7 +280,7 @@ ARG INTEGRATIONS_CORE="\
   system_core \
   system_swap"
 
-ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.24.0
+ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.26.0
 RUN apk add --force-broken-world --virtual .build-deps \
     gcc \
     git \
