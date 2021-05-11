@@ -76,9 +76,6 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
 
 WORKDIR /build/datadog-agent
 
-COPY fix-ebpf-for-alpine3.13.patch ./
-RUN patch -p1 < fix-ebpf-for-alpine3.13.patch
-
 RUN for d in \
       PyYAML \
       requests \
