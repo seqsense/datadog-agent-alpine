@@ -64,10 +64,9 @@ RUN apk add --no-cache \
     py3-requests \
     py3-toml \
     py3-wheel \
-    py3-yaml \
     python3-dev
 
-ARG DATADOG_VERSION=7.26.0
+ARG DATADOG_VERSION=7.27.1
 # datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
 RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent \
   && cd /build/datadog-agent \
@@ -80,7 +79,6 @@ COPY fix-ebpf-for-alpine3.13.patch ./
 RUN patch -p1 < fix-ebpf-for-alpine3.13.patch
 
 RUN for d in \
-      PyYAML \
       requests \
       toml \
     ; do \
@@ -216,7 +214,6 @@ RUN apk add \
     py3-requests-toolbelt \
     py3-six \
     py3-wheel \
-    py3-yaml \
     python3 \
     xz \
   && if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
@@ -280,7 +277,7 @@ ARG INTEGRATIONS_CORE="\
   system_core \
   system_swap"
 
-ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.26.0
+ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.27.0
 RUN apk add --force-broken-world --virtual .build-deps \
     gcc \
     git \
@@ -292,7 +289,6 @@ RUN apk add --force-broken-world --virtual .build-deps \
   && git fetch --depth=1 origin refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION}:refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
   && git checkout refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
   && for d in \
-      PyYAML \
       cryptography \
       prometheus-client \
       protobuf \
