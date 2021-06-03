@@ -282,6 +282,7 @@ RUN apk add --force-broken-world --virtual .build-deps \
     gcc \
     git \
     krb5-dev \
+    linux-headers \
     musl-dev \
     python3-dev \
   && git clone --depth=1 https://github.com/DataDog/integrations-core.git /tmp/integrations-core \
