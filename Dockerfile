@@ -310,11 +310,16 @@ RUN apk add --force-broken-world --virtual .build-deps \
   && find /usr -name "*.pyc" -delete \
   && find /usr -name "__pycache__" -delete \
   && rm -rf \
-    /usr/lib/python*/site-packages/twisted/test
+    /usr/lib/python*/site-packages/twisted/test \
+    /usr/lib/python*/site-packages/docutils
 
 # note: removed packages from datadog_checks_base/requirements.in
 #   botocore: seems not used at all https://github.com/DataDog/integrations-core/search?q=botocore
 #   other packages: installed as Alpine package
+
+# note: removed directories
+#   twisted/test: unit test of twisted package
+#   docutils: indirect dev dependency
 
 EXPOSE 8125/udp 8126/tcp
 
