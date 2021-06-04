@@ -290,6 +290,7 @@ RUN apk add --force-broken-world --virtual .build-deps \
   && git fetch --depth=1 origin refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION}:refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
   && git checkout refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
   && for d in \
+      botocore \
       cryptography \
       prometheus-client \
       protobuf \
@@ -307,7 +308,13 @@ RUN apk add --force-broken-world --virtual .build-deps \
   && cd / && rm -rf /tmp/integrations-core \
   && rm -f /var/cache/apk/* \
   && find /usr -name "*.pyc" -delete \
-  && find /usr -name "__pycache__" -delete
+  && find /usr -name "__pycache__" -delete \
+  && rm -rf \
+    /usr/lib/python*/site-packages/twisted/test
+
+# note: removed packages from datadog_checks_base/requirements.in
+#   botocore: seems not used at all https://github.com/DataDog/integrations-core/search?q=botocore
+#   other packages: installed as Alpine package
 
 EXPOSE 8125/udp 8126/tcp
 
