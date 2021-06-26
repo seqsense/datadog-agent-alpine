@@ -201,7 +201,7 @@ RUN apk add \
     libexecinfo \
     libffi \
     libgcc \
-    libressl \
+    openssl-dev \
     libseccomp \
     libstdc++ \
     lz4-libs \
