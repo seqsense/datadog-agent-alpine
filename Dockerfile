@@ -18,6 +18,7 @@ RUN apk add --no-cache \
     musl-libintl \
     ninja \
     patch \
+    rsync \
     util-linux-dev \
     xz-dev
 
