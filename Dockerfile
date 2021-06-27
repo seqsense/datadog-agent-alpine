@@ -145,6 +145,7 @@ RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
       llvm10 \
       llvm10-dev \
       llvm10-static; \
+    ln -s /usr/lib/llvm11/bin/llc /usr/bin/llc; \
     ln -s /usr/include/llvm10/llvm /usr/include/; \
     ln -s /usr/include/llvm10/llvm-c /usr/include/; \
     for l in /usr/lib/llvm10/lib/*.a; do \
