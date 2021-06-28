@@ -1,4 +1,4 @@
-FROM alpine:3.13 as systemd-builder
+FROM alpine:3.14 as systemd-builder
 
 RUN apk add --no-cache \
     autoconf \
@@ -18,6 +18,7 @@ RUN apk add --no-cache \
     musl-libintl \
     ninja \
     patch \
+    rsync \
     util-linux-dev \
     xz-dev
 
@@ -46,7 +47,7 @@ RUN strip -s /usr/local/lib/libsystemd.so*
 
 
 # ===========================
-FROM golang:1.16-alpine3.13 AS agent-builder
+FROM golang:1.16-alpine3.14 AS agent-builder
 
 RUN apk add --no-cache \
     ca-certificates \
@@ -141,12 +142,12 @@ RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
       linux-virt-dev \
       linux-headers \
       libbpf-dev \
-      llvm10 \
-      llvm10-dev \
-      llvm10-static; \
-    ln -s /usr/include/llvm10/llvm /usr/include/; \
-    ln -s /usr/include/llvm10/llvm-c /usr/include/; \
-    for l in /usr/lib/llvm10/lib/*.a; do \
+      llvm11 \
+      llvm11-dev \
+      llvm11-static; \
+    ln -s /usr/include/llvm11/llvm /usr/include/; \
+    ln -s /usr/include/llvm11/llvm-c /usr/include/; \
+    for l in /usr/lib/llvm11/lib/*.a; do \
       ln -s $l /usr/lib/; \
     done; \
     invoke system-probe.build \
@@ -189,7 +190,7 @@ RUN rm -rf \
 
 
 # ===========================
-FROM alpine:3.13 AS datadog-agent
+FROM alpine:3.14 AS datadog-agent
 
 ARG ENABLE_SYSTEM_PROBE=1
 
@@ -200,7 +201,7 @@ RUN apk add \
     libexecinfo \
     libffi \
     libgcc \
-    libressl \
+    openssl-dev \
     libseccomp \
     libstdc++ \
     lz4-libs \
