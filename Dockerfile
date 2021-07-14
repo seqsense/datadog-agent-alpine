@@ -44,10 +44,6 @@ RUN ninja -C build libsystemd.so.${SYSTEMD_LIB_VERSION}
 RUN cp -v $(find build -name "libsystemd.so.${SYSTEMD_LIB_VERSION}" -type f) /usr/local/lib/
 RUN strip -s /usr/local/lib/libsystemd.so.${SYSTEMD_LIB_VERSION}
 
-RUN cd /usr/local/lib/ \
-  && ln -s libsystemd.so.${SYSTEMD_LIB_VERSION} libsystemd.so.0 \
-  && ln -s libsystemd.so.${SYSTEMD_LIB_VERSION} libsystemd.so
-
 
 # ===========================
 FROM golang:1.16-alpine3.14 AS agent-builder
@@ -245,6 +241,10 @@ RUN mkdir -p \
   && ln -s /usr /opt/datadog-agent/embedded
 
 COPY --from=systemd-builder /usr/local/lib/libsystemd.so* /usr/lib/
+RUN SYSTEMD_SO=$(find /usr/lib/ -name "libsystemd.so.*.*.*" | head -n1) \
+  && ln -s ${SYSTEMD_SO} $(echo ${SYSTEMD_SO} | sed 's/.[0-9]\+$//') \
+  && ln -s ${SYSTEMD_SO} $(echo ${SYSTEMD_SO} | sed 's/.[0-9]\+.[0-9]\+$//') \
+  && ln -s ${SYSTEMD_SO} $(echo ${SYSTEMD_SO} | sed 's/.[0-9]\+.[0-9]\+.[0-9]\+$//')
 
 # Install datadog agent
 COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/s6-services /etc/services.d/
