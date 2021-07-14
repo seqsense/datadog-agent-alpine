@@ -20,7 +20,8 @@ RUN apk add --no-cache \
     patch \
     rsync \
     util-linux-dev \
-    xz-dev
+    xz-dev \
+    zstd-dev
 
 ARG SYSTEMD_VERSION=v246.6
 ARG SYSTEMD_LIB_VERSION=0.29.0
@@ -215,7 +216,8 @@ RUN apk add \
     py3-six \
     py3-wheel \
     python3 \
-    xz \
+    xz-libs \
+    zstd-libs \
   && if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
       apk add --no-cache \
         bcc \
