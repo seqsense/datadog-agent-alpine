@@ -250,7 +250,9 @@ RUN SYSTEMD_SO=$(find /usr/lib/ -name "libsystemd.so.*.*.*" | head -n1) \
 
 # Install datadog agent
 COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/s6-services /etc/services.d/
-COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/entrypoint  /etc/cont-init.d/
+COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/cont-init.d /etc/cont-init.d/
+COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/entrypoint.sh /bin/entrypoint.sh
+COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/entrypoint.d /opt/entrypoints
 COPY --from=agent-builder \
   /build/datadog-agent/Dockerfiles/agent/probe.sh \
   /build/datadog-agent/Dockerfiles/agent/initlog.sh \
@@ -336,4 +338,4 @@ ARG DATADOG_VERSION=7.30.2
 ENV DATADOG_INTEGRATIONS_CORE_VERSION=${DATADOG_INTEGRATIONS_CORE_VERSION} \
   DATADOG_VERSION=${DATADOG_VERSION}
 
-CMD ["/init"]
+CMD ["/bin/entrypoint.sh"]
