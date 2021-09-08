@@ -1,0 +1,19 @@
+version: 2
+services:
+  datadog-agent:
+    image: datadog-agent:7-alpine
+    environment:
+      DD_API_KEY: ${DD_API_KEY}
+      DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL: "true"
+      DD_LOGS_ENABLED: "true"
+    security_opt:
+      - "apparmor:unconfined"
+      - "seccomp:unconfined"
+    volumes:
+      - /etc/machine-id:/etc/machine-id:ro
+      - /proc/:/host/proc/:ro
+      - /run/systemd/:/host/run/systemd/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+      - /var/log/journal:/var/log/journal:ro
+      - /var/log/audit:/var/log/audit:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
