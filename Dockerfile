@@ -67,7 +67,7 @@ RUN apk add --no-cache \
     py3-wheel \
     python3-dev
 
-ARG DATADOG_VERSION=7.29.1
+ARG DATADOG_VERSION=7.30.2
 # datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
 RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent \
   && cd /build/datadog-agent \
@@ -250,7 +250,9 @@ RUN SYSTEMD_SO=$(find /usr/lib/ -name "libsystemd.so.*.*.*" | head -n1) \
 
 # Install datadog agent
 COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/s6-services /etc/services.d/
-COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/entrypoint  /etc/cont-init.d/
+COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/cont-init.d /etc/cont-init.d/
+COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/entrypoint.sh /bin/entrypoint.sh
+COPY --from=agent-builder /build/datadog-agent/Dockerfiles/agent/entrypoint.d /opt/entrypoints
 COPY --from=agent-builder \
   /build/datadog-agent/Dockerfiles/agent/probe.sh \
   /build/datadog-agent/Dockerfiles/agent/initlog.sh \
@@ -283,7 +285,7 @@ ARG INTEGRATIONS_CORE="\
   system_core \
   system_swap"
 
-ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.29.0
+ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.30.1
 RUN apk add --force-broken-world --virtual .build-deps \
     gcc \
     git \
@@ -332,8 +334,8 @@ EXPOSE 8125/udp 8126/tcp
 HEALTHCHECK --interval=30s --timeout=5s --retries=2 \
   CMD ["/probe.sh"]
 
-ARG DATADOG_VERSION=7.29.1
+ARG DATADOG_VERSION=7.30.2
 ENV DATADOG_INTEGRATIONS_CORE_VERSION=${DATADOG_INTEGRATIONS_CORE_VERSION} \
   DATADOG_VERSION=${DATADOG_VERSION}
 
-CMD ["/init"]
+CMD ["/bin/entrypoint.sh"]
