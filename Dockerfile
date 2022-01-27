@@ -67,7 +67,7 @@ RUN apk add --no-cache \
     py3-wheel \
     python3-dev
 
-ARG DATADOG_VERSION=7.32.4
+ARG DATADOG_VERSION=7.33.0
 # datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
 RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent \
   && cd /build/datadog-agent \
@@ -75,9 +75,6 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
   && git checkout refs/tags/${DATADOG_VERSION}
 
 WORKDIR /build/datadog-agent
-
-COPY fix-ebpf-for-alpine3.13.patch ./
-RUN patch -p1 < fix-ebpf-for-alpine3.13.patch
 
 RUN for d in \
       requests \
@@ -285,7 +282,7 @@ ARG INTEGRATIONS_CORE="\
   system_core \
   system_swap"
 
-ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.32.0
+ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.33.0
 RUN apk add --force-broken-world --virtual .build-deps \
     gcc \
     git \
@@ -334,7 +331,7 @@ EXPOSE 8125/udp 8126/tcp
 HEALTHCHECK --interval=30s --timeout=5s --retries=2 \
   CMD ["/probe.sh"]
 
-ARG DATADOG_VERSION=7.32.4
+ARG DATADOG_VERSION=7.33.0
 ENV DATADOG_INTEGRATIONS_CORE_VERSION=${DATADOG_INTEGRATIONS_CORE_VERSION} \
   DATADOG_VERSION=${DATADOG_VERSION}
 
