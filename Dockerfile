@@ -50,17 +50,19 @@ RUN strip -s /usr/local/lib/libsystemd.so.${SYSTEMD_LIB_VERSION}
 FROM golang:1.17-alpine3.14 AS agent-builder
 
 RUN apk add --no-cache \
+    aws-cli \
     ca-certificates \
     cmake \
     curl \
-    gcc \
     g++ \
+    gcc \
     git \
     libexecinfo-dev \
     libffi-dev \
     make \
     musl-dev \
     patch \
+    py3-packaging \
     py3-pip \
     py3-requests \
     py3-toml \
@@ -76,7 +78,16 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
 
 WORKDIR /build/datadog-agent
 
-RUN for d in \
+ARG DD_AGENT_PIP_REQUIREMENTS=https://raw.githubusercontent.com/DataDog/datadog-agent-buildimages/main/requirements.txt
+RUN if [ "$(sed '/^#/d' requirements.txt)" != "-r ${DD_AGENT_PIP_REQUIREMENTS}" ]; then \
+      echo 'Dependency management strategy is changed on upstream' >&2; \
+      false; \
+    fi \
+  && curl -s ${DD_AGENT_PIP_REQUIREMENTS} > requirements.txt \
+  && for d in \
+      PyYAML \
+      awscli \
+      packaging \
       requests \
       toml \
     ; do \
@@ -192,17 +203,19 @@ FROM alpine:3.14 AS datadog-agent
 ARG ENABLE_SYSTEM_PROBE=1
 
 RUN apk add \
+    aws-cli \
     bash \
     ca-certificates \
     coreutils \
     libexecinfo \
     libffi \
     libgcc \
-    openssl-dev \
     libseccomp \
     libstdc++ \
     lz4-libs \
+    openssl-dev \
     py3-cryptography \
+    py3-packaging \
     py3-pip \
     py3-prometheus-client \
     py3-protobuf \
