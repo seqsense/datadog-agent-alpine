@@ -317,7 +317,7 @@ RUN apk add --force-broken-world --virtual .build-deps \
       requests_toolbelt \
       six \
     ; do \
-      sed "/^$d=/d" -i datadog_checks_base/requirements.in; \
+      sed "/\"$d=/d" -i datadog_checks_base/pyproject.toml; \
     done \
   && python3 -m pip install \
     "./datadog_checks_base[deps, http]" \
@@ -331,7 +331,7 @@ RUN apk add --force-broken-world --virtual .build-deps \
     /usr/lib/python*/site-packages/twisted/test \
     /usr/lib/python*/site-packages/docutils
 
-# note: removed packages from datadog_checks_base/requirements.in
+# note: removed packages from datadog_checks_base/pyproject.toml
 #   botocore: seems not used at all https://github.com/DataDog/integrations-core/search?q=botocore
 #   other packages: installed as Alpine package
 
