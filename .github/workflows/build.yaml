@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         enable:
-          - PROCESS_AGENT=0 SECURITY_AGENT=0 TRACE_AGENT=0 SYSTEM_PROBE=0
+          - PROCESS_AGENT=0 SECURITY_AGENT=0 TRACE_AGENT=0 SYSTEM_PROBE=0 BUILD_INTEGRATIONS_BUILDER=1
           - PROCESS_AGENT=1 SECURITY_AGENT=0 TRACE_AGENT=0 SYSTEM_PROBE=0
           - PROCESS_AGENT=1 SECURITY_AGENT=0 TRACE_AGENT=1 SYSTEM_PROBE=0
           - PROCESS_AGENT=1 SECURITY_AGENT=1 TRACE_AGENT=1 SYSTEM_PROBE=1
@@ -36,6 +36,12 @@ jobs:
                 ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }} \
                 ${{ steps.tag.outputs.tag }} \
             || true
+          docker pull \
+              ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}-integrations-builder \
+            && docker tag \
+                ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}-integrations-builder \
+                ${{ steps.tag.outputs.tag }}-integrations-builder \
+            || true
 
       - name: Build images
         id: build
@@ -46,15 +52,21 @@ jobs:
         id: full-tag
         run: make show-image-full-tag
 
+      - name: Build integrations-builder
+        if: env.BUILD_INTEGRATIONS_BUILDER == 1
+        env:
+          BUILD_OPTS: "--cache-from ${{ steps.tag.outputs.tag }} --pull"
+        run: make docker-build-integrations-builder
+
       - name: Login to GitHub Container Registry
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CONTAINER_REGISTRY_TOKEN }}
       - name: Deploy
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           docker tag \
             ${{ steps.tag.outputs.tag }} \
@@ -66,3 +78,12 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}
           docker push \
             ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}
+
+      - name: Deploy integrations-builder
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && env.BUILD_INTEGRATIONS_BUILDER == 1
+        run: |
+          docker tag \
+            ${{ steps.tag.outputs.tag }}-integrations-builder \
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}-integrations-builder
+          docker push \
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}-integrations-builder

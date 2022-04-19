@@ -38,6 +38,17 @@ docker-build:
 		-t $(NAME):$(TAG) .
 	@echo $(NAME):$(TAG) is built
 
+.PHONY: docker-build-integrations-builder
+docker-build-integrations-builder:
+ifeq ($(ENABLE_PROCESS_AGENT)$(ENABLE_SECURITY_AGENT)$(ENABLE_TRACE_AGENT)$(ENABLE_SYSTEM_PROBE),0000)
+	docker build \
+		$(BUILD_OPTS) \
+		-t $(NAME):$(TAG)-integrations-builder .
+	@echo $(NAME):$(TAG) is built
+else
+	@echo integrations-builder should be built without optional agents
+endif
+
 .PHONY: show-image-tag
 show-image-tag:
 	@echo "::set-output name=tag::$(NAME):$(TAG)"
