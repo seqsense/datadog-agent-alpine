@@ -44,7 +44,7 @@ ifeq ($(ENABLE_PROCESS_AGENT)$(ENABLE_SECURITY_AGENT)$(ENABLE_TRACE_AGENT)$(ENAB
 	docker build \
 		$(BUILD_OPTS) \
 		-t $(NAME):$(TAG)-integrations-builder .
-	@echo $(NAME):$(TAG) is built
+	@echo $(NAME):$(TAG)-integrations-builder is built
 else
 	@echo integrations-builder should be built without optional agents
 endif
