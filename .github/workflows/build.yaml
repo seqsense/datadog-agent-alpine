@@ -53,7 +53,7 @@ jobs:
         run: make show-image-full-tag
 
       - name: Build integrations-builder
-        if: env.BUILD_INTEGRATIONS_BUILDER == 1
+        if: env.ENABLE_BUILD_INTEGRATIONS_BUILDER == 1
         env:
           BUILD_OPTS: "--cache-from ${{ steps.tag.outputs.tag }} --pull"
         run: make docker-build-integrations-builder
@@ -80,7 +80,7 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}
 
       - name: Deploy integrations-builder
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && env.BUILD_INTEGRATIONS_BUILDER == 1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && env.ENABLE_BUILD_INTEGRATIONS_BUILDER == 1
         run: |
           docker tag \
             ${{ steps.tag.outputs.tag }}-integrations-builder \
