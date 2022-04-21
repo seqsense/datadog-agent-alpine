@@ -54,8 +54,6 @@ jobs:
 
       - name: Build integrations-builder
         if: env.ENABLE_BUILD_INTEGRATIONS_BUILDER == 1
-        env:
-          BUILD_OPTS: "--cache-from ${{ steps.tag.outputs.tag }} --pull"
         run: make docker-build-integrations-builder
 
       - name: Login to GitHub Container Registry
