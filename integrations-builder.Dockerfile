@@ -1,4 +1,5 @@
-FROM datadog-agent:7-alpine
+ARG DATADOG_MAJOR_VERSION
+FROM datadog-agent:${DATADOG_MAJOR_VERSION}-alpine
 
 WORKDIR /wheels
 

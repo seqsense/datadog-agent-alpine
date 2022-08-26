@@ -43,6 +43,7 @@ docker-build-integrations-builder:
 ifeq ($(ENABLE_PROCESS_AGENT)$(ENABLE_SECURITY_AGENT)$(ENABLE_TRACE_AGENT)$(ENABLE_SYSTEM_PROBE),0000)
 	docker build \
 		$(BUILD_OPTS) \
+		--build-arg DATADOG_MAJOR_VERSION=$(DATADOG_MAJOR_VERSION) \
 		-f integrations-builder.Dockerfile \
 		-t $(NAME):$(TAG)-integrations-builder .
 	@echo $(NAME):$(TAG)-integrations-builder is built
