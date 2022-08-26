@@ -50,24 +50,26 @@ RUN strip -s /usr/local/lib/libsystemd.so.${SYSTEMD_LIB_VERSION}
 FROM golang:1.17-alpine3.14 AS agent-builder
 
 RUN apk add --no-cache \
+    aws-cli \
     ca-certificates \
     cmake \
     curl \
-    gcc \
     g++ \
+    gcc \
     git \
     libexecinfo-dev \
     libffi-dev \
     make \
     musl-dev \
     patch \
+    py3-packaging \
     py3-pip \
     py3-requests \
     py3-toml \
     py3-wheel \
     python3-dev
 
-ARG DATADOG_VERSION=7.34.0
+ARG DATADOG_VERSION=7.35.1
 # datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
 RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent \
   && cd /build/datadog-agent \
@@ -76,7 +78,16 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
 
 WORKDIR /build/datadog-agent
 
-RUN for d in \
+ARG DD_AGENT_PIP_REQUIREMENTS=https://raw.githubusercontent.com/DataDog/datadog-agent-buildimages/main/requirements.txt
+RUN if [ "$(sed '/^#/d' requirements.txt)" != "-r ${DD_AGENT_PIP_REQUIREMENTS}" ]; then \
+      echo 'Dependency management strategy is changed on upstream' >&2; \
+      false; \
+    fi \
+  && curl -s ${DD_AGENT_PIP_REQUIREMENTS} > requirements.txt \
+  && for d in \
+      PyYAML \
+      awscli \
+      packaging \
       requests \
       toml \
     ; do \
@@ -192,17 +203,19 @@ FROM alpine:3.14 AS datadog-agent
 ARG ENABLE_SYSTEM_PROBE=1
 
 RUN apk add \
+    aws-cli \
     bash \
     ca-certificates \
     coreutils \
     libexecinfo \
     libffi \
     libgcc \
-    openssl-dev \
     libseccomp \
     libstdc++ \
     lz4-libs \
+    openssl-dev \
     py3-cryptography \
+    py3-packaging \
     py3-pip \
     py3-prometheus-client \
     py3-protobuf \
@@ -282,7 +295,7 @@ ARG INTEGRATIONS_CORE="\
   system_core \
   system_swap"
 
-ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.34.0
+ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.35.0
 RUN apk add --force-broken-world --virtual .build-deps \
     gcc \
     git \
@@ -304,7 +317,7 @@ RUN apk add --force-broken-world --virtual .build-deps \
       requests_toolbelt \
       six \
     ; do \
-      sed "/^$d=/d" -i datadog_checks_base/requirements.in; \
+      sed "/\"$d=/d" -i datadog_checks_base/pyproject.toml; \
     done \
   && python3 -m pip install \
     "./datadog_checks_base[deps, http]" \
@@ -318,7 +331,7 @@ RUN apk add --force-broken-world --virtual .build-deps \
     /usr/lib/python*/site-packages/twisted/test \
     /usr/lib/python*/site-packages/docutils
 
-# note: removed packages from datadog_checks_base/requirements.in
+# note: removed packages from datadog_checks_base/pyproject.toml
 #   botocore: seems not used at all https://github.com/DataDog/integrations-core/search?q=botocore
 #   other packages: installed as Alpine package
 
@@ -331,7 +344,7 @@ EXPOSE 8125/udp 8126/tcp
 HEALTHCHECK --interval=30s --timeout=5s --retries=2 \
   CMD ["/probe.sh"]
 
-ARG DATADOG_VERSION=7.34.0
+ARG DATADOG_VERSION=7.35.1
 ENV DATADOG_INTEGRATIONS_CORE_VERSION=${DATADOG_INTEGRATIONS_CORE_VERSION} \
   DATADOG_VERSION=${DATADOG_VERSION}
 
