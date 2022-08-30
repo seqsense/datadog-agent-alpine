@@ -14,6 +14,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     strategy:
       matrix:
         enable:
@@ -29,28 +30,40 @@ jobs:
           echo ${{ matrix.enable }} \
             | xargs -n1 echo \
             | xargs -n1 -I{} echo ENABLE_{} >> ${GITHUB_ENV}
+
+      - name: Cache docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/layer-cache
+          key: layer-cache-${{ github.sha }}
+          restore-keys: layer-cache-
+
       - name: Get image tag
         id: tag
         run: make show-image-tag
-      - name: Pull previous image
-        run: |
-          docker pull \
-              ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }} \
-            && docker tag \
-                ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }} \
-                ${{ steps.tag.outputs.tag }} \
-            || true
-          docker pull \
-              ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}-integrations-builder \
-            && docker tag \
-                ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}-integrations-builder \
-                ${{ steps.tag.outputs.tag }}-integrations-builder \
-            || true
+      - name: Prepare cache and pull latest release to reuse layers
+        uses: seqsense/sq-actions/buildx-pull@main
+        id: layer-cache
+        with:
+          IMAGES: |
+            ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}
+            ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}-integrations-builder
+
+      - name: Set up Docker Buildx for enabling cache exporters
+        uses: docker/setup-buildx-action@v2
+        with:
+          driver: docker-container
+          driver-opts: network=host
 
       - name: Build images
         id: build
+        timeout-minutes: 45
         env:
-          BUILD_OPTS: "--cache-from ${{ steps.tag.outputs.tag }} --pull"
+          BUILDX_OPTS: >-
+            --load
+            ${{ steps.layer-cache.outputs.buildx-opts }}
+            --cache-from type=local,src=/tmp/layer-cache/main
+            --cache-to type=local,mode=max,dest=/tmp/layer-cache/main
         run: make docker-build BUILD_OPTS="${BUILD_OPTS}"
       - name: Get image tag
         id: full-tag
@@ -58,6 +71,12 @@ jobs:
 
       - name: Build integrations-builder
         if: env.ENABLE_BUILD_INTEGRATIONS_BUILDER == 1
+        env:
+          BUILDX_OPTS: >-
+            --load
+            ${{ steps.layer-cache.outputs.buildx-opts }}
+            --cache-from type=local,src=/tmp/layer-cache/integ
+            --cache-to type=local,mode=max,dest=/tmp/layer-cache/integ
         run: make docker-build-integrations-builder
 
       - name: Login to GitHub Container Registry
