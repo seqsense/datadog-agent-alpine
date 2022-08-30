@@ -143,6 +143,8 @@ RUN if [ ${ENABLE_TRACE_AGENT} -eq 1 ]; then \
     mv bin/trace-agent/trace-agent /agent-bin/; \
   fi
 
+COPY ebpf-llvm12.patch ./
+
 ARG ENABLE_SYSTEM_PROBE=0
 RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
     apk add --no-cache \
