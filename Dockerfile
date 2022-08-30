@@ -18,14 +18,15 @@ RUN apk add --no-cache \
     musl-libintl \
     ninja \
     patch \
+    py3-jinja2 \
     rsync \
     util-linux-dev \
     xz-dev \
     zstd-dev
 
-ARG SYSTEMD_VERSION=v246.6
-ARG SYSTEMD_LIB_VERSION=0.29.0
-ARG OPENEMBEDDED_CORE_SHA=3325992e66e8fbd80292beb4b0ffd50beca138d8
+ARG SYSTEMD_VERSION=v250.5
+ARG SYSTEMD_LIB_VERSION=0.33.0
+ARG OPENEMBEDDED_CORE_SHA=20a7ab9ff6ed777c6617a338d049ebe03fcc588c
 
 ENV CFLAGS=-Os
 WORKDIR /work/systemd
@@ -35,6 +36,8 @@ RUN cd /work \
   && git clone --depth=10000 https://github.com/openembedded/openembedded-core.git \
   && (cd openembedded-core && git checkout ${OPENEMBEDDED_CORE_SHA}) \
   && cp openembedded-core/meta/recipes-core/systemd/systemd/*.patch systemd/
+
+ENV CFLAGS=-D__UAPI_DEF_ETHHDR=0
 
 RUN ls -1 *.patch | xargs -n1 patch -p1 -i
 RUN ./configure \
