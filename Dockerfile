@@ -115,7 +115,7 @@ COPY --from=systemd-builder /work/systemd/src/systemd/ /usr/include/systemd/
 RUN invoke agent.build \
     --python-runtimes=3 \
     --exclude-rtloader \
-    --build-exclude=jmx,kubeapiserver,gce,ec2
+    --build-exclude=jmx,kubeapiserver,gce,ec2,orchestrator
 
 RUN mkdir -p /agent-bin \
   && touch /agent-bin/.keep
