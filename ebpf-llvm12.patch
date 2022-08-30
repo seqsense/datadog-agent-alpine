@@ -1,0 +1,12 @@
+diff --git a/pkg/ebpf/compiler/compiler.cpp b/pkg/ebpf/compiler/compiler.cpp
+index bf70e907f..3f8b9ceaf 100644
+--- a/pkg/ebpf/compiler/compiler.cpp
++++ b/pkg/ebpf/compiler/compiler.cpp
+@@ -52,6 +52,7 @@ ClangCompiler::ClangCompiler(const char *name) :
+ 
+     theDriver = std::make_unique<clang::driver::Driver>(
+         name, getArch(), *diagnosticsEngine,
++        "clang LLVM compiler",
+         llvm::vfs::getRealFileSystem()
+     );
+ 

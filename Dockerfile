@@ -162,6 +162,7 @@ RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
     for l in /usr/lib/llvm${LLVM_VERSION}/lib/*.a; do \
       ln -s $l /usr/lib/; \
     done; \
+    patch -p1 < ebpf-llvm12.patch; \
     invoke system-probe.build \
       --python-runtimes=3; \
     mv bin/system-probe/system-probe /agent-bin/; \
