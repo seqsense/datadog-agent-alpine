@@ -35,8 +35,10 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/layer-cache
-          key: layer-cache-${{ github.sha }}
-          restore-keys: layer-cache-
+          key: layer-cache-${{ matrix.enable }}-${{ hashFiles('*Dockerfile') }}
+          restore-keys: |
+            layer-cache-${{ matrix.enable }}-
+            layer-cache-
 
       - name: Get image tag
         id: tag
