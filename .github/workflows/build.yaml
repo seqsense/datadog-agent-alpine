@@ -62,10 +62,18 @@ jobs:
         timeout-minutes: 45
         env:
           BUILDX_OPTS: >-
-            --load
             ${{ steps.layer-cache.outputs.buildx-opts }}
             --cache-from type=local,src=/tmp/layer-cache/main
             --cache-to type=local,mode=max,dest=/tmp/layer-cache/main
+        run: make docker-build BUILD_OPTS="${BUILD_OPTS}"
+      - name: Embed inline cache
+        id: build
+        timeout-minutes: 5
+        env:
+          BUILDX_OPTS: >-
+            --load
+            --cache-from type=local,src=/tmp/layer-cache/main
+            --cache-to type=inline
         run: make docker-build BUILD_OPTS="${BUILD_OPTS}"
       - name: Get image tag
         id: full-tag
@@ -75,10 +83,18 @@ jobs:
         if: env.ENABLE_BUILD_INTEGRATIONS_BUILDER == 1
         env:
           BUILDX_OPTS: >-
-            --load
             ${{ steps.layer-cache.outputs.buildx-opts }}
+            --cache-from type=local,src=/tmp/layer-cache/main
             --cache-from type=local,src=/tmp/layer-cache/integ
             --cache-to type=local,mode=max,dest=/tmp/layer-cache/integ
+        run: make docker-build-integrations-builder
+      - name: Embed inline cache to integrations-builder
+        if: env.ENABLE_BUILD_INTEGRATIONS_BUILDER == 1
+        env:
+          BUILDX_OPTS: >-
+            --load
+            --cache-from type=local,src=/tmp/layer-cache/integ
+            --cache-to type=inline
         run: make docker-build-integrations-builder
 
       - name: Login to GitHub Container Registry
