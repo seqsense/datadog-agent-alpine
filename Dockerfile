@@ -1,4 +1,4 @@
-FROM alpine:3.16 as systemd-builder
+FROM alpine:3.15 as systemd-builder
 
 RUN apk add --no-cache \
     autoconf \
@@ -50,7 +50,7 @@ RUN strip -s /usr/local/lib/libsystemd.so.${SYSTEMD_LIB_VERSION}
 
 
 # ===========================
-FROM golang:1.17-alpine3.16 AS agent-builder
+FROM golang:1.17-alpine3.15 AS agent-builder
 
 RUN apk add --no-cache \
     aws-cli \
@@ -202,7 +202,7 @@ RUN rm -rf \
 
 
 # ===========================
-FROM alpine:3.16 AS datadog-agent
+FROM alpine:3.15 AS datadog-agent
 
 ARG ENABLE_SYSTEM_PROBE=1
 
