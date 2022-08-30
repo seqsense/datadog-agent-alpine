@@ -58,7 +58,6 @@ jobs:
           driver-opts: network=host
 
       - name: Build images
-        id: build
         timeout-minutes: 45
         env:
           BUILDX_OPTS: >-
@@ -67,7 +66,6 @@ jobs:
             --cache-to type=local,mode=max,dest=/tmp/layer-cache/main
         run: make docker-build BUILD_OPTS="${BUILD_OPTS}"
       - name: Embed inline cache
-        id: build
         timeout-minutes: 5
         env:
           BUILDX_OPTS: >-
