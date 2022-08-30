@@ -153,12 +153,13 @@ RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
       linux-virt-dev \
       linux-headers \
       libbpf-dev \
-      llvm11 \
-      llvm11-dev \
-      llvm11-static; \
-    ln -s /usr/include/llvm11/llvm /usr/include/; \
-    ln -s /usr/include/llvm11/llvm-c /usr/include/; \
-    for l in /usr/lib/llvm11/lib/*.a; do \
+      llvm \
+      llvm-dev \
+      llvm-static; \
+    LLVM_VERSION=$(apk info -e llvm | sed 's/^llvm//'); \
+    ln -s /usr/include/llvm${LLVM_VERSION}/llvm /usr/include/; \
+    ln -s /usr/include/llvm${LLVM_VERSION}/llvm-c /usr/include/; \
+    for l in /usr/lib/llvm${LLVM_VERSION}/lib/*.a; do \
       ln -s $l /usr/lib/; \
     done; \
     invoke system-probe.build \
