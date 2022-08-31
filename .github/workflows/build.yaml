@@ -81,7 +81,7 @@ jobs:
         if: env.ENABLE_BUILD_INTEGRATIONS_BUILDER == 1
         env:
           BUILDX_OPTS: >-
-            --build-arg BASE_IMAGE_PREFIX=localhost:5000/
+            --build-arg BASE_IMAGE_PREFIX=${{ steps.layer-cache.outputs.registry-addr }}/
             ${{ steps.layer-cache.outputs.buildx-opts }}
             --cache-from type=local,src=/tmp/layer-cache/main
             --cache-from type=local,src=/tmp/layer-cache/integ
@@ -89,15 +89,15 @@ jobs:
         run: |
           docker tag \
             ${{ steps.tag.outputs.tag }} \
-            localhost:5000/${{ steps.tag.outputs.tag }}
-          docker push localhost:5000/${{ steps.tag.outputs.tag }}
+            ${{ steps.layer-cache.outputs.registry-addr }}/${{ steps.tag.outputs.tag }}
+          docker push ${{ steps.layer-cache.outputs.registry-addr }}/${{ steps.tag.outputs.tag }}
           make docker-build-integrations-builder
       - name: Embed inline cache to integrations-builder
         if: env.ENABLE_BUILD_INTEGRATIONS_BUILDER == 1
         env:
           BUILDX_OPTS: >-
             --load
-            --build-arg BASE_IMAGE_PREFIX=localhost:5000/
+            --build-arg BASE_IMAGE_PREFIX=${{ steps.layer-cache.outputs.registry-addr }}/
             --cache-from type=local,src=/tmp/layer-cache/integ
             --cache-to type=inline
         run: make docker-build-integrations-builder
