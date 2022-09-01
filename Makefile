@@ -15,8 +15,6 @@ INTEGRATIONS_CORE ?= \
   system_core \
   system_swap
 
-BUILD_OPTS ?=
-
 TAG_SUFFIX_LIST := \
 	$(shell [ $(ENABLE_PROCESS_AGENT)  -eq 1 ] && echo "-proc") \
 	$(shell [ $(ENABLE_SECURITY_AGENT) -eq 1 ] && echo "-sec") \
@@ -26,10 +24,15 @@ TAG_SUFFIX_LIST := \
 TAG_SUFFIX := $(shell echo $(TAG_SUFFIX_LIST) | sed 's|[ \t]||g; s|-proc-sec-apm-sys|-all|;')-alpine
 TAG        := $(DATADOG_MAJOR_VERSION)$(TAG_SUFFIX)
 
+ifeq ($(shell docker buildx version > /dev/null 2> /dev/null; echo $$?),0)
+DOCKER_BUILD_CMD := docker buildx build $(or $(BUILDX_OPTS),--load)
+else
+DOCKER_BUILD_CMD := docker build
+endif
+
 .PHONY: docker-build
 docker-build:
-	docker build \
-		$(BUILD_OPTS) \
+	$(DOCKER_BUILD_CMD) \
 		--build-arg ENABLE_PROCESS_AGENT=$(ENABLE_PROCESS_AGENT) \
 		--build-arg ENABLE_SECURITY_AGENT=$(ENABLE_SECURITY_AGENT) \
 		--build-arg ENABLE_TRACE_AGENT=$(ENABLE_TRACE_AGENT) \
@@ -41,8 +44,7 @@ docker-build:
 .PHONY: docker-build-integrations-builder
 docker-build-integrations-builder:
 ifeq ($(ENABLE_PROCESS_AGENT)$(ENABLE_SECURITY_AGENT)$(ENABLE_TRACE_AGENT)$(ENABLE_SYSTEM_PROBE),0000)
-	docker build \
-		$(BUILD_OPTS) \
+	$(DOCKER_BUILD_CMD) \
 		--build-arg DATADOG_MAJOR_VERSION=$(DATADOG_MAJOR_VERSION) \
 		-f integrations-builder.Dockerfile \
 		-t $(NAME):$(TAG)-integrations-builder .
