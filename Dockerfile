@@ -50,7 +50,7 @@ RUN strip -s /usr/local/lib/libsystemd.so.${SYSTEMD_LIB_VERSION}
 
 
 # ===========================
-FROM golang:1.17-alpine3.14 AS agent-builder
+FROM golang:1.17-alpine3.16 AS agent-builder
 
 RUN apk add --no-cache \
     aws-cli \
@@ -143,6 +143,8 @@ RUN if [ ${ENABLE_TRACE_AGENT} -eq 1 ]; then \
     mv bin/trace-agent/trace-agent /agent-bin/; \
   fi
 
+COPY ebpf-llvm12.patch ./
+
 ARG ENABLE_SYSTEM_PROBE=0
 RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
     apk add --no-cache \
@@ -153,14 +155,16 @@ RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
       linux-virt-dev \
       linux-headers \
       libbpf-dev \
-      llvm11 \
-      llvm11-dev \
-      llvm11-static; \
-    ln -s /usr/include/llvm11/llvm /usr/include/; \
-    ln -s /usr/include/llvm11/llvm-c /usr/include/; \
-    for l in /usr/lib/llvm11/lib/*.a; do \
+      llvm \
+      llvm-dev \
+      llvm-static; \
+    LLVM_VERSION=$(apk info -e llvm | sed 's/^llvm//'); \
+    ln -s /usr/include/llvm${LLVM_VERSION}/llvm /usr/include/; \
+    ln -s /usr/include/llvm${LLVM_VERSION}/llvm-c /usr/include/; \
+    for l in /usr/lib/llvm${LLVM_VERSION}/lib/*.a; do \
       ln -s $l /usr/lib/; \
     done; \
+    patch -p1 < ebpf-llvm12.patch; \
     invoke system-probe.build \
       --python-runtimes=3; \
     mv bin/system-probe/system-probe /agent-bin/; \
