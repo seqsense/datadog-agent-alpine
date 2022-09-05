@@ -1,19 +1,29 @@
 version: "2"
 services:
   datadog-agent:
-    image: datadog-agent:7-alpine
+    image: datadog-agent:7-all-alpine
     environment:
       DD_API_KEY: "${DD_API_KEY}"
-      DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL: "true"
-      DD_LOGS_ENABLED: "true"
+      DD_SYSTEM_PROBE_ENABLED: "true"
+      DD_PROCESS_AGENT_ENABLED: "true"
     security_opt:
-      - apparmor:unconfined
-      - seccomp:unconfined
+      - "apparmor:unconfined"
+      - "seccomp:unconfined"
+    cap_add:
+      - SYS_ADMIN
+      - SYS_RESOURCE
+      - SYS_PTRACE
+      - NET_ADMIN
+      - NET_BROADCAST
+      - NET_RAW
+      - IPC_LOCK
+      - CHOWN
     volumes:
       - /etc/machine-id:/etc/machine-id:ro
       - /proc/:/host/proc/:ro
       - /run/systemd/:/host/run/systemd/:ro
       - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+      - /sys/kernel/debug:/sys/kernel/debug
       - /var/log/journal:/var/log/journal:ro
       - /var/log/audit:/var/log/audit:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
