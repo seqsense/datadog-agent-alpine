@@ -166,7 +166,7 @@ RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
     && patch -p1 < llvm13.patch \
     && invoke system-probe.build --python-runtimes=3 \
     && mv bin/system-probe/system-probe /agent-bin/ \
-    && mv /opt/datadog-agent/embedded /agent-embedded/; \
+    && mv /opt/datadog-agent/embedded/* /agent-embedded/; \
   fi
 
 RUN mkdir -p \
@@ -278,7 +278,7 @@ COPY --from=agent-builder /build/datadog-agent/dev/lib/* /usr/lib/
 COPY --from=agent-builder /etc/datadog-agent             /etc/datadog-agent/
 COPY --from=agent-builder /opt/datadog-agent             /opt/datadog-agent/
 COPY --from=agent-builder /agent-bin/*                   /usr/bin/
-COPY --from=agent-builder /agent-embedded/embedded       /usr/
+COPY --from=agent-builder /agent-embedded                /usr/
 
 # Disable omitted agents
 RUN if [ ! -f /usr/bin/process-agent   ]; then rm -rf /etc/services.d/process;  fi \
