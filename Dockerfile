@@ -146,7 +146,7 @@ COPY llvm13.patch ./
 
 ARG ENABLE_SYSTEM_PROBE=0
 RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
-    apk add --no-cache --virtual .build-deps \
+    apk add --no-cache \
       bcc-dev \
       clang \
       clang-dev \
@@ -165,7 +165,6 @@ RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
     done \
     && patch -p1 < llvm13.patch \
     && invoke system-probe.build --python-runtimes=3 \
-    && apk del --no-cache .build-deps \
     && mv bin/system-probe/system-probe /agent-bin/ \
     && mv /opt/datadog-agent/embedded/* /agent-embedded/ \
     && rm -rf /opt/datadog-agent/embedded \
