@@ -126,20 +126,22 @@ RUN mkdir -p /agent-bin \
 
 ARG ENABLE_PROCESS_AGENT=0
 RUN if [ ${ENABLE_PROCESS_AGENT} -eq 1 ]; then \
-    invoke process-agent.build --python-runtimes=3 \
-    && mv bin/process-agent/process-agent /agent-bin/; \
+    invoke process-agent.build \
+      --python-runtimes=3; \
+    mv bin/process-agent/process-agent /agent-bin/; \
   fi
 
 ARG ENABLE_SECURITY_AGENT=0
 RUN if [ ${ENABLE_SECURITY_AGENT} -eq 1 ]; then \
-    invoke security-agent.build \
-    && mv bin/security-agent/security-agent /agent-bin/; \
+    invoke security-agent.build; \
+    mv bin/security-agent/security-agent /agent-bin/; \
   fi
 
 ARG ENABLE_TRACE_AGENT=0
 RUN if [ ${ENABLE_TRACE_AGENT} -eq 1 ]; then \
-    invoke trace-agent.build --python-runtimes=3 \
-    && mv bin/trace-agent/trace-agent /agent-bin/; \
+    invoke trace-agent.build \
+      --python-runtimes=3; \
+    mv bin/trace-agent/trace-agent /agent-bin/; \
   fi
 
 COPY llvm13.patch ./
@@ -156,19 +158,20 @@ RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
       libbpf-dev \
       llvm \
       llvm-dev \
-      llvm-static \
-    && LLVM_VERSION=$(apk info -e llvm | sed 's/^llvm//') \
-    && ln -s /usr/include/llvm${LLVM_VERSION}/llvm /usr/include/ \
-    && ln -s /usr/include/llvm${LLVM_VERSION}/llvm-c /usr/include/ \
-    && for l in /usr/lib/llvm${LLVM_VERSION}/lib/*.a; do \
+      llvm-static; \
+    LLVM_VERSION=$(apk info -e llvm | sed 's/^llvm//'); \
+    ln -s /usr/include/llvm${LLVM_VERSION}/llvm /usr/include/; \
+    ln -s /usr/include/llvm${LLVM_VERSION}/llvm-c /usr/include/; \
+    for l in /usr/lib/llvm${LLVM_VERSION}/lib/*.a; do \
       ln -s $l /usr/lib/; \
-    done \
-    && patch -p1 < llvm13.patch \
-    && invoke system-probe.build --python-runtimes=3 \
-    && mv bin/system-probe/system-probe /agent-bin/ \
-    && mv /opt/datadog-agent/embedded/* /agent-embedded/ \
-    && rm -rf /opt/datadog-agent/embedded \
-    && find /agent-embedded/ -name "*.bc" -delete; \
+    done; \
+    patch -p1 < llvm13.patch; \
+    invoke system-probe.build \
+      --python-runtimes=3; \
+    mv bin/system-probe/system-probe /agent-bin/; \
+    mv /opt/datadog-agent/embedded/* /agent-embedded/; \
+    rm -rf /opt/datadog-agent/embedded; \
+    find /agent-embedded/ -name "*.bc" -delete; \
   fi
 
 RUN mkdir -p \
