@@ -68,14 +68,16 @@ index 3137d87ca..2a31122ff 100644
  +symver_wrap_f1(log2f)
  +
 diff --git a/tasks/system_probe.py b/tasks/system_probe.py
-index 5350c1386..c48c1961f 100644
+index 5350c1386..4a879b8de 100644
 --- a/tasks/system_probe.py
 +++ b/tasks/system_probe.py
-@@ -25,7 +25,7 @@ NPM_TAG = "npm"
+@@ -25,7 +25,9 @@ NPM_TAG = "npm"
  GIMME_ENV_VARS = ['GOROOT', 'PATH']
  DNF_TAG = "dnf"
  
 -CLANG_CMD = "clang {flags} -c '{c_file}' -o '{bc_file}'"
++# https://lore.kernel.org/lkml/6d7635be-e694-0132-e2b2-e6816c34aa72@huawei.com/T/
++# https://github.com/torvalds/linux/blob/7e18e42e4b280c85b76967a9106a13ca61c16179/samples/bpf/Makefile#L425-L432
 +CLANG_CMD = "clang {flags} -emit-llvm -Xclang -disable-llvm-passes -c '{c_file}' -o - | opt -O2 -mtriple=bpf-pc-linux | llvm-dis -o='{bc_file}'"
  LLC_CMD = "llc -march=bpf -filetype=obj -o '{obj_file}' '{bc_file}'"
  
