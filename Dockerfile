@@ -238,7 +238,6 @@ RUN apk add \
     zstd-libs \
   && if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
       apk add --no-cache \
-        bcc \
         libbpf; \
     fi \
   && rm -f /var/cache/apk/* \
