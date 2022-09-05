@@ -1,0 +1,84 @@
+diff --git a/pkg/ebpf/c/cmakelists.patch b/pkg/ebpf/c/cmakelists.patch
+index 56819bf80..c787edd5c 100644
+--- a/pkg/ebpf/c/cmakelists.patch
++++ b/pkg/ebpf/c/cmakelists.patch
+@@ -1,11 +1,11 @@
+ --- CMakeLists.txt	2020-12-18 19:57:38.000000000 +0000
+ +++ CMakeLists.txt	2022-02-09 22:07:27.926584000 +0000
+-@@ -67,6 +67,9 @@
++@@ -68,6 +68,9 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (default Debug)" FORCE)
+  endif()
+ 
+-+add_compile_options("-Wl,--wrap=exp -Wl,--wrap=log -Wl,--wrap=pow -Wl,--wrap=log2 -Wl,--wrap=log2f")
+-+link_libraries("-Wl,--wrap=exp -Wl,--wrap=log -Wl,--wrap=pow -Wl,--wrap=log2 -Wl,--wrap=log2f")
+++add_compile_options("-Wl,--wrap=exp -Wl,--wrap=log -Wl,--wrap=log2 -Wl,--wrap=log2f")
+++link_libraries("-Wl,--wrap=exp -Wl,--wrap=log -Wl,--wrap=log2 -Wl,--wrap=log2f")
+ +
+  # Side-by-side subprojects layout: automatically set the
+  # LLVM_EXTERNAL_${project}_SOURCE_DIR using LLVM_ALL_PROJECTS
+diff --git a/pkg/ebpf/c/constant_folding.patch b/pkg/ebpf/c/constant_folding.patch
+index 3137d87ca..2a31122ff 100644
+--- a/pkg/ebpf/c/constant_folding.patch
++++ b/pkg/ebpf/c/constant_folding.patch
+@@ -1,6 +1,6 @@
+ --- lib/Analysis/ConstantFolding.cpp	2020-12-18 19:57:38.000000000 +0000
+ +++ lib/Analysis/ConstantFolding.cpp	2022-02-09 22:09:26.145370000 +0000
+-@@ -56,6 +56,85 @@
++@@ -60,6 +60,68 @@
+  #include <cstddef>
+  #include <cstdint>
+ 
+@@ -27,15 +27,6 @@
+ +  return __ ## func ## _prior_glibc(x);                         \
+ +}
+ +
+-+#define symver_wrap_d2(func)                                    \
+-+double __ ## func ## _prior_glibc(double x, double y);          \
+-+                                                                \
+-+asm(".symver __" #func "_prior_glibc, " #func "@" GLIBC_VERS);  \
+-+                                                                \
+-+double __wrap_ ## func (double x, double y) {                   \
+-+  return __ ## func ## _prior_glibc(x, y);                      \
+-+}
+-+
+ +#define symver_wrap_f1(func)                                    \
+ +float __ ## func ## _prior_glibc(float x);                      \
+ +                                                                \
+@@ -56,13 +47,6 @@
+ +  return func(x);                                               \
+ +}
+ +
+-+#define symver_wrap_d2(func)                                    \
+-+double func(double x, double y);                                \
+-+                                                                \
+-+double __wrap_ ## func (double x, double y) {                   \
+-+  return func(x, y);                                            \
+-+}
+-+
+ +#define symver_wrap_f1(func)                                    \
+ +float func(float x);                                            \
+ +                                                                \
+@@ -75,7 +59,6 @@
+ +
+ +symver_wrap_d1(exp)
+ +symver_wrap_d1(log)
+-+symver_wrap_d2(pow)
+ +symver_wrap_d1(log2)
+ +symver_wrap_f1(log2f)
+ +
+diff --git a/tasks/system_probe.py b/tasks/system_probe.py
+index 5350c1386..4a879b8de 100644
+--- a/tasks/system_probe.py
++++ b/tasks/system_probe.py
+@@ -25,7 +25,9 @@ NPM_TAG = "npm"
+ GIMME_ENV_VARS = ['GOROOT', 'PATH']
+ DNF_TAG = "dnf"
+ 
+-CLANG_CMD = "clang {flags} -c '{c_file}' -o '{bc_file}'"
++# https://lore.kernel.org/lkml/6d7635be-e694-0132-e2b2-e6816c34aa72@huawei.com/T/
++# https://github.com/torvalds/linux/blob/7e18e42e4b280c85b76967a9106a13ca61c16179/samples/bpf/Makefile#L425-L432
++CLANG_CMD = "clang {flags} -emit-llvm -Xclang -disable-llvm-passes -c '{c_file}' -o - | opt -O2 -mtriple=bpf-pc-linux | llvm-dis -o='{bc_file}'"
+ LLC_CMD = "llc -march=bpf -filetype=obj -o '{obj_file}' '{bc_file}'"
+ 
+ KITCHEN_DIR = os.getenv('DD_AGENT_TESTING_DIR') or os.path.normpath(os.path.join(os.getcwd(), "test", "kitchen"))

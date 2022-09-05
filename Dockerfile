@@ -121,6 +121,7 @@ RUN invoke agent.build \
     --build-exclude=jmx,kubeapiserver,gce,ec2,orchestrator
 
 RUN mkdir -p /agent-bin \
+  && mkdir -p /agent-embedded \
   && touch /agent-bin/.keep
 
 ARG ENABLE_PROCESS_AGENT=0
@@ -143,7 +144,7 @@ RUN if [ ${ENABLE_TRACE_AGENT} -eq 1 ]; then \
     mv bin/trace-agent/trace-agent /agent-bin/; \
   fi
 
-COPY ebpf-llvm12.patch ./
+COPY ebpf-llvm13.patch ./
 
 ARG ENABLE_SYSTEM_PROBE=0
 RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
@@ -164,10 +165,13 @@ RUN if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
     for l in /usr/lib/llvm${LLVM_VERSION}/lib/*.a; do \
       ln -s $l /usr/lib/; \
     done; \
-    patch -p1 < ebpf-llvm12.patch; \
+    patch -p1 < ebpf-llvm13.patch; \
     invoke system-probe.build \
       --python-runtimes=3; \
     mv bin/system-probe/system-probe /agent-bin/; \
+    mv /opt/datadog-agent/embedded/* /agent-embedded/; \
+    rm -rf /opt/datadog-agent/embedded; \
+    find /agent-embedded/ -name "*.bc" -delete; \
   fi
 
 RUN mkdir -p \
@@ -237,7 +241,6 @@ RUN apk add \
     zstd-libs \
   && if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
       apk add --no-cache \
-        bcc \
         libbpf; \
     fi \
   && rm -f /var/cache/apk/* \
@@ -279,6 +282,7 @@ COPY --from=agent-builder /build/datadog-agent/dev/lib/* /usr/lib/
 COPY --from=agent-builder /etc/datadog-agent             /etc/datadog-agent/
 COPY --from=agent-builder /opt/datadog-agent             /opt/datadog-agent/
 COPY --from=agent-builder /agent-bin/*                   /usr/bin/
+COPY --from=agent-builder /agent-embedded                /usr/
 
 # Disable omitted agents
 RUN if [ ! -f /usr/bin/process-agent   ]; then rm -rf /etc/services.d/process;  fi \
