@@ -129,7 +129,6 @@ RUN set -eu; \
   if [ ${ENABLE_PROCESS_AGENT} -eq 1 ]; then \
     invoke process-agent.build \
       --python-runtimes=3; \
-    false; \
     mv bin/process-agent/process-agent /agent-bin/; \
   fi
 
