@@ -72,7 +72,7 @@ RUN apk add --no-cache \
     py3-wheel \
     python3-dev
 
-ARG DATADOG_VERSION=7.35.1
+ARG DATADOG_VERSION=7.38.2
 # datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
 RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent \
   && cd /build/datadog-agent \
@@ -118,7 +118,7 @@ COPY --from=systemd-builder /work/systemd/src/systemd/ /usr/include/systemd/
 RUN invoke agent.build \
     --python-runtimes=3 \
     --exclude-rtloader \
-    --build-exclude=jmx,kubeapiserver,gce,ec2
+    --build-exclude=jmx,kubeapiserver,gce,ec2,orchestrator
 
 RUN mkdir -p /agent-bin \
   && touch /agent-bin/.keep
@@ -302,7 +302,7 @@ ARG INTEGRATIONS_CORE="\
   system_core \
   system_swap"
 
-ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.35.0
+ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.38.2
 RUN apk add --force-broken-world --virtual .build-deps \
     gcc \
     git \
@@ -351,7 +351,7 @@ EXPOSE 8125/udp 8126/tcp
 HEALTHCHECK --interval=30s --timeout=5s --retries=2 \
   CMD ["/probe.sh"]
 
-ARG DATADOG_VERSION=7.35.1
+ARG DATADOG_VERSION=7.38.2
 ENV DATADOG_INTEGRATIONS_CORE_VERSION=${DATADOG_INTEGRATIONS_CORE_VERSION} \
   DATADOG_VERSION=${DATADOG_VERSION}
 

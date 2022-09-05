@@ -13,7 +13,6 @@ RUN apk add --no-cache \
     musl-dev \
     py3-aiohttp \
     py3-bcrypt \
-    py3-click \
     py3-cryptography \
     py3-distlib \
     py3-pynacl \
@@ -36,7 +35,6 @@ RUN git clone --depth=1 https://github.com/DataDog/integrations-core.git /tmp/in
   && python3 -m pip install \
     aiohttp==$(version py3-aiohttp) \
     bcrypt==$(version py3-bcrypt) \
-    click==$(version py3-click) \
     cryptography==$(version py3-cryptography) \
     distlib==$(version py3-distlib) \
     pynacl==$(version py3-pynacl) \
