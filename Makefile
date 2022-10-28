@@ -55,8 +55,8 @@ endif
 
 .PHONY: show-image-tag
 show-image-tag:
-	@echo "::set-output name=tag::$(NAME):$(TAG)"
+	@echo "tag=$(NAME):$(TAG)" >> ${GITHUB_OUTPUT}
 
 .PHONY: show-image-full-tag
 show-image-full-tag:
-	@echo "::set-output name=full_tag::$(NAME):$$(docker run --rm --entrypoint /opt/datadog-agent/bin/agent/agent $(NAME):$(TAG) version -n | cut -f2 -d" ")$(TAG_SUFFIX)"
+	@echo "full_tag=$(NAME):$$(docker run --rm --entrypoint /opt/datadog-agent/bin/agent/agent $(NAME):$(TAG) version -n | cut -f2 -d" ")$(TAG_SUFFIX)" >> ${GITHUB_OUTPUT}
