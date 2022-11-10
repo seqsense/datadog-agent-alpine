@@ -72,7 +72,7 @@ RUN apk add --no-cache \
     py3-wheel \
     python3-dev
 
-ARG DATADOG_VERSION=7.39.2
+ARG DATADOG_VERSION=7.40.1
 # datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
 RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent \
   && cd /build/datadog-agent \
@@ -147,8 +147,6 @@ RUN set -eu; \
     mv bin/trace-agent/trace-agent /agent-bin/; \
   fi
 
-COPY ebpf-llvm13.patch ./
-
 ARG ENABLE_SYSTEM_PROBE=0
 RUN set -eu; \
   if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
@@ -162,14 +160,14 @@ RUN set -eu; \
       libbpf-dev \
       llvm \
       llvm-dev \
-      llvm-static; \
+      llvm-static \
+      ninja; \
     LLVM_VERSION=$(apk info -e llvm | sed 's/^llvm//'); \
     ln -s /usr/include/llvm${LLVM_VERSION}/llvm /usr/include/; \
     ln -s /usr/include/llvm${LLVM_VERSION}/llvm-c /usr/include/; \
     for l in /usr/lib/llvm${LLVM_VERSION}/lib/*.a; do \
       ln -s $l /usr/lib/; \
     done; \
-    patch -p1 < ebpf-llvm13.patch; \
     invoke system-probe.build \
       --python-runtimes=3; \
     mv bin/system-probe/system-probe /agent-bin/; \
@@ -310,7 +308,7 @@ ARG INTEGRATIONS_CORE="\
   system_core \
   system_swap"
 
-ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.39.0
+ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.40.1
 RUN apk add --force-broken-world --virtual .build-deps \
     gcc \
     git \
@@ -359,7 +357,7 @@ EXPOSE 8125/udp 8126/tcp
 HEALTHCHECK --interval=30s --timeout=5s --retries=2 \
   CMD ["/probe.sh"]
 
-ARG DATADOG_VERSION=7.39.2
+ARG DATADOG_VERSION=7.40.1
 ENV DATADOG_INTEGRATIONS_CORE_VERSION=${DATADOG_INTEGRATIONS_CORE_VERSION} \
   DATADOG_VERSION=${DATADOG_VERSION}
 
