@@ -160,7 +160,8 @@ RUN set -eu; \
       libbpf-dev \
       llvm \
       llvm-dev \
-      llvm-static; \
+      llvm-static \
+      ninja; \
     LLVM_VERSION=$(apk info -e llvm | sed 's/^llvm//'); \
     ln -s /usr/include/llvm${LLVM_VERSION}/llvm /usr/include/; \
     ln -s /usr/include/llvm${LLVM_VERSION}/llvm-c /usr/include/; \
