@@ -147,8 +147,6 @@ RUN set -eu; \
     mv bin/trace-agent/trace-agent /agent-bin/; \
   fi
 
-COPY ebpf-llvm13.patch ./
-
 ARG ENABLE_SYSTEM_PROBE=0
 RUN set -eu; \
   if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
@@ -169,7 +167,6 @@ RUN set -eu; \
     for l in /usr/lib/llvm${LLVM_VERSION}/lib/*.a; do \
       ln -s $l /usr/lib/; \
     done; \
-    patch -p1 < ebpf-llvm13.patch; \
     invoke system-probe.build \
       --python-runtimes=3; \
     mv bin/system-probe/system-probe /agent-bin/; \
