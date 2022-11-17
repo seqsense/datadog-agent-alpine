@@ -1,4 +1,4 @@
-FROM alpine:3.16 as systemd-builder
+FROM alpine:3.17 as systemd-builder
 
 RUN apk add --no-cache \
     autoconf \
@@ -211,7 +211,7 @@ RUN rm -rf \
 
 
 # ===========================
-FROM alpine:3.16 AS datadog-agent
+FROM alpine:3.17 AS datadog-agent
 
 ARG ENABLE_SYSTEM_PROBE=1
 
