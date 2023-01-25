@@ -310,6 +310,7 @@ ARG INTEGRATIONS_CORE="\
 
 ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.41.0
 RUN apk add --force-broken-world --virtual .build-deps \
+    g++ \
     gcc \
     git \
     krb5-dev \
