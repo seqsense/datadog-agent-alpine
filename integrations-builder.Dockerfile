@@ -6,6 +6,7 @@ WORKDIR /wheels
 
 RUN apk add --no-cache \
     gcc \
+    g++ \
     git \
     libffi-dev \
     openssl-dev \
