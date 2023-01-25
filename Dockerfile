@@ -60,7 +60,6 @@ RUN apk add --no-cache \
     g++ \
     gcc \
     git \
-    libexecinfo-dev \
     libffi-dev \
     make \
     musl-dev \
@@ -103,7 +102,9 @@ ENV CGO_CFLAGS="-Os -I/build/datadog-agent/dev/include" \
   CGO_LDFLAGS="-L/build/datadog-agent/dev/lib" \
   GOFLAGS="-ldflags=-w -ldflags=-s"
 
-RUN invoke rtloader.make \
+COPY disable-execinfo-for-musl.patch .
+RUN patch -p1 < disable-execinfo-for-musl.patch \
+  && invoke rtloader.make \
     --python-runtimes=3 \
     --cmake-options="\
       -DCMAKE_INSTALL_LIBDIR=lib \
@@ -220,7 +221,6 @@ RUN apk add \
     bash \
     ca-certificates \
     coreutils \
-    libexecinfo \
     libffi \
     libgcc \
     libseccomp \
