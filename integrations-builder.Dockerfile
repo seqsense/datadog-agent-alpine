@@ -9,6 +9,8 @@ RUN apk add --no-cache \
     g++ \
     git \
     libffi-dev \
+    libunwind-dev \
+    lz4-dev \
     openssl-dev \
     make \
     musl-dev \
