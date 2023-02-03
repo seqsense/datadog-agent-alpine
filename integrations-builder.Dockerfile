@@ -18,6 +18,7 @@ RUN apk add --no-cache \
     py3-bcrypt \
     py3-cryptography \
     py3-distlib \
+    py3-packaging \
     py3-pynacl \
     py3-pip \
     py3-regex \
@@ -40,6 +41,7 @@ RUN git clone --depth=1 https://github.com/DataDog/integrations-core.git /tmp/in
     bcrypt==$(version py3-bcrypt) \
     cryptography==$(version py3-cryptography) \
     distlib==$(version py3-distlib) \
+    packaging==$(version py3-packaging) \
     pynacl==$(version py3-pynacl) \
     pip==$(version py3-pip) \
     regex==$(version py3-regex) \
