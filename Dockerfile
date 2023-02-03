@@ -309,7 +309,7 @@ ARG INTEGRATIONS_CORE="\
   system_swap"
 
 ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.41.0
-RUN apk add --force-broken-world --virtual .build-deps \
+RUN apk add --virtual .build-deps \
     g++ \
     gcc \
     git \
