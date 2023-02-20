@@ -1,12 +1,24 @@
+diff --git a/rtloader/rtloader/CMakeLists.txt b/rtloader/rtloader/CMakeLists.txt
+index 8cb06c7e79..6f9fc422d3 100644
+--- a/rtloader/rtloader/CMakeLists.txt
++++ b/rtloader/rtloader/CMakeLists.txt
+@@ -32,6 +32,7 @@ add_library(datadog-agent-rtloader SHARED
+ find_library(EXECINFO execinfo)
+ if(EXECINFO)
+     target_link_libraries(datadog-agent-rtloader execinfo)
++    add_compile_definitions(HAS_BACKTRACE_LIB)
+ endif()
+ endif()
+ 
 diff --git a/rtloader/rtloader/api.cpp b/rtloader/rtloader/api.cpp
-index af5fe74b59..59bf755e4c 100644
+index af5fe74b59..f150be80d0 100644
 --- a/rtloader/rtloader/api.cpp
 +++ b/rtloader/rtloader/api.cpp
 @@ -12,7 +12,9 @@
  #ifndef _WIN32
  // clang-format off
  // handler stuff
-+#ifdef __GLIBC__
++#ifdef HAS_BACKTRACE_LIB
  #include <execinfo.h>
 +#endif
  #include <csignal>
@@ -16,14 +28,14 @@ index af5fe74b59..59bf755e4c 100644
  #    define STACKTRACE_SIZE 500
  void signalHandler(int sig, siginfo_t *, void *)
  {
-+#    ifdef __GLIBC__
++#    ifdef HAS_BACKTRACE_LIB
      void *buffer[STACKTRACE_SIZE];
      char **symbols;
  
      size_t nptrs = backtrace(buffer, STACKTRACE_SIZE);
 +#    endif
      std::cerr << "HANDLER CAUGHT signal Error: signal " << sig << std::endl;
-+#    ifdef __GLIBC__
++#    ifdef HAS_BACKTRACE_LIB
      symbols = backtrace_symbols(buffer, nptrs);
      if (symbols == NULL) {
          std::cerr << "Error getting backtrace symbols" << std::endl;
