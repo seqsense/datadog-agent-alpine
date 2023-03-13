@@ -131,3 +131,9 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}-integrations-builder
           docker push \
             ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}-integrations-builder
+
+      - name: Notify failure
+        uses: seqsense/sq-actions/notify-branch-build@main
+        if: failure() && github.event_name == 'push'
+        with:
+          title: ":x: Release failed"
