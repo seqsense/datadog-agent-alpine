@@ -1,8 +1,14 @@
 # datadog-agent-alpine
 Small footprint datadog-agent  based on Alpine Linux
 
+## News
+
+### 7.41.1
+`system-probe` is no longer built for datadog-agent-alpine images.
+Use official image if you use `system-probe`.
+
 ## Getting started
-Availability of `process-agent`, `security-agent`, `trace-agent`, and `system-probe` can be switched by the make arguments: `ENABLE_PROCESS_AGENT`, `ENABLE_SECURITY_AGENT`, `ENABLE_TRACE_AGENT`, `ENABLE_SYSTEM_PROBE` (set `1` to enable)
+Availability of `process-agent`, `security-agent`, and `trace-agent` can be switched by the make arguments: `ENABLE_PROCESS_AGENT`, `ENABLE_SECURITY_AGENT`, `ENABLE_TRACE_AGENT` (set `1` to enable)
 
 Installed integrations can be selected by `INTEGRATIONS_CORE` argument.
 `btrfs`, `disk`, `ssh_check`, `statsd`, `system_core`, `system_swap` are enabled by default.
@@ -39,7 +45,7 @@ docker pull ghcr.io/seqsense/datadog-agent:7-proc-alpine
 # Image including process-agent and trace-agent
 docker pull ghcr.io/seqsense/datadog-agent:7-proc-apm-alpine
 
-# Image including process-agent, security-agent, trace-agent, and system-probe
+# Image including process-agent, security-agent, and trace-agent
 docker pull ghcr.io/seqsense/datadog-agent:7-all-alpine
 ```
 
