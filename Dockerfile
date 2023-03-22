@@ -275,7 +275,7 @@ RUN ls -l /opt/datadog-agent
 # ===========================
 FROM alpine:3.17 AS datadog-agent
 
-ARG ENABLE_SYSTEM_PROBE=1
+ARG ENABLE_SYSTEM_PROBE=0
 
 RUN --mount=type=cache,target=/etc/apk/cache,id=apk \
   apk add \
@@ -350,10 +350,12 @@ COPY --from=agent-builder /agent-bin/*                   /usr/bin/
 COPY --from=system-probe-builder /agent-bin/*            /usr/bin/
 COPY --from=system-probe-builder /agent-embedded         /usr/
 
-ARG ENABLE_SYSTEM_PROBE=0
 RUN set -eu; \
   if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
+    cp /etc/apk/repositories /etc/apk/repositories.orig; \
+    echo 'https://dl-cdn.alpinelinux.org/alpine/v3.15/main' > /etc/apk/repositories; \
     apk add --no-cache clang; \
+    mv /etc/apk/repositories.orig /etc/apk/repositories; \
     ln -s /usr/bin/llc /opt/datadog-agent/embedded/bin/llc-bpf; \
     ln -s /usr/bin/clang /opt/datadog-agent/embedded/bin/clang-bpf; \
   fi
