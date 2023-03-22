@@ -148,35 +148,6 @@ RUN set -eu; \
     mv bin/trace-agent/trace-agent /agent-bin/; \
   fi
 
-ARG ENABLE_SYSTEM_PROBE=0
-RUN set -eu; \
-  if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
-    apk add --no-cache \
-      bcc-dev \
-      clang \
-      clang-dev \
-      clang-static \
-      linux-virt-dev \
-      linux-headers \
-      libbpf-dev \
-      llvm \
-      llvm-dev \
-      llvm-static \
-      ninja; \
-    LLVM_VERSION=$(apk info -e llvm | sed 's/^llvm//'); \
-    ln -s /usr/include/llvm${LLVM_VERSION}/llvm /usr/include/; \
-    ln -s /usr/include/llvm${LLVM_VERSION}/llvm-c /usr/include/; \
-    for l in /usr/lib/llvm${LLVM_VERSION}/lib/*.a; do \
-      ln -s $l /usr/lib/; \
-    done; \
-    invoke system-probe.build \
-      --python-runtimes=3; \
-    mv bin/system-probe/system-probe /agent-bin/; \
-    mv /opt/datadog-agent/embedded/* /agent-embedded/; \
-    rm -rf /opt/datadog-agent/embedded; \
-    find /agent-embedded/ -name "*.bc" -delete; \
-  fi
-
 RUN mkdir -p \
     /opt/datadog-agent/bin/agent/dist \
     /opt/datadog-agent/run \
@@ -214,8 +185,6 @@ RUN rm -rf \
 # ===========================
 FROM alpine:3.17 AS datadog-agent
 
-ARG ENABLE_SYSTEM_PROBE=1
-
 RUN apk add \
     aws-cli \
     bash \
@@ -241,10 +210,6 @@ RUN apk add \
     python3 \
     xz-libs \
     zstd-libs \
-  && if [ ${ENABLE_SYSTEM_PROBE} -eq 1 ]; then \
-      apk add --no-cache \
-        libbpf; \
-    fi \
   && rm -f /var/cache/apk/* \
   && find /usr -name "*.pyc" -delete \
   && find /usr -name "__pycache__" -delete
