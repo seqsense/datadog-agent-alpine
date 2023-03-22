@@ -155,8 +155,8 @@ RUN --mount=type=cache,target=/etc/apk/cache,id=apk \
     cp -r /opt/datadog-agent/embedded/* /agent-embedded/; \
     find /agent-embedded/ -name "*.bc" -delete; \
     rm \
-      /opt/datadog-agent/embedded/bin/llc-bpf \
-      /opt/datadog-agent/embedded/bin/clang-bpf; \
+      /agent-embedded/bin/llc-bpf \
+      /agent-embedded/bin/clang-bpf; \
   fi
 
 
