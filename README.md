@@ -53,5 +53,4 @@ docker pull ghcr.io/seqsense/datadog-agent:7-all-alpine
 The scripts to build the images are licensed under the [Apache License, Version 2.0](LICENSE).
 
 The Datadog agent user space components are licensed under the [Apache License, Version 2.0](https://github.com/DataDog/datadog-agent/blob/master/LICENSE).
-The BPF code is licensed under the [General Public License, Version 2.0](https://github.com/DataDog/datadog-agent/blob/master/pkg/ebpf/c/COPYING).
 See https://github.com/DataDog/datadog-agent/#license for the details.
