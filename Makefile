@@ -19,7 +19,7 @@ TAG_SUFFIX_LIST := \
 	$(shell [ $(ENABLE_SECURITY_AGENT) -eq 1 ] && echo "-sec") \
 	$(shell [ $(ENABLE_TRACE_AGENT)    -eq 1 ] && echo "-apm")
 
-TAG_SUFFIX := $(shell echo $(TAG_SUFFIX_LIST) | sed 's|[ \t]||g; s|-proc-sec-apm-sys|-all|;')-alpine
+TAG_SUFFIX := $(shell echo $(TAG_SUFFIX_LIST) | sed 's|[ \t]||g; s|-proc-sec-apm|-all|;')-alpine
 TAG        := $(DATADOG_MAJOR_VERSION)$(TAG_SUFFIX)
 
 ifeq ($(shell docker buildx version > /dev/null 2> /dev/null; echo $$?),0)
