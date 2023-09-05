@@ -121,9 +121,7 @@ ENV CGO_CFLAGS="-Os -I/build/datadog-agent/dev/include" \
   CGO_LDFLAGS="-L/build/datadog-agent/dev/lib" \
   GOFLAGS="-ldflags=-w -ldflags=-s"
 
-COPY disable-execinfo-for-musl.patch .
-RUN patch -p1 < disable-execinfo-for-musl.patch \
-  && invoke rtloader.make \
+RUN invoke rtloader.make \
     --python-runtimes=3 \
     --cmake-options="\
       -DCMAKE_INSTALL_LIBDIR=lib \
