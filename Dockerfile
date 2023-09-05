@@ -64,11 +64,16 @@ RUN apk add --no-cache \
     make \
     musl-dev \
     patch \
+    py3-boto3 \
+    py3-botocore \
+    py3-dulwich \
     py3-packaging \
     py3-pip \
     py3-requests \
+    py3-semver \
     py3-toml \
     py3-wheel \
+    py3-yaml \
     python3-dev
 
 ARG DATADOG_VERSION=7.47.0
@@ -80,21 +85,35 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
 
 WORKDIR /build/datadog-agent
 
-RUN DD_AGENT_PIP_REQUIREMENTS="$(sed '/^#/d;s|^-r \(https://\)|\1|' requirements.txt)" \
-  && if [ "$(sed '/^#/d' requirements.txt | wc -l)" -ne 1 ] || [ $(echo "${DD_AGENT_PIP_REQUIREMENTS}" | wc -l) -ne 1 ]; then \
+RUN DD_AGENT_PIP_REQUIREMENTS="$(sed -n 's|^-r \(https://\)|\1|p' requirements.txt)" \
+  && if [ $(echo "${DD_AGENT_PIP_REQUIREMENTS}" | wc -l) -ne 1 ]; then \
       echo 'Dependency management strategy is changed on upstream' >&2; \
       false; \
     fi \
-  && curl -s ${DD_AGENT_PIP_REQUIREMENTS} > requirements.txt \
+  && echo "---1" \
+  && cat requirements.txt \
+  && echo "---2" \
+  && curl -s ${DD_AGENT_PIP_REQUIREMENTS} >> requirements.txt \
+  && echo "---3" \
+  && cat requirements.txt \
+  && echo "---4" \
+  && sed -i '/^#/d;/^-r/d' requirements.txt \
   && for d in \
       PyYAML \
       awscli \
+      dulwich \
       packaging \
+      boto3 \
+      botocore \
       requests \
+      semver \
       toml \
     ; do \
       sed "/^$d=/d" -i requirements.txt; \
     done \
+  && echo "---5" \
+  && cat requirements.txt \
+  && echo "---6" \
   && python3 -m pip install -r requirements.txt
 RUN invoke deps
 
