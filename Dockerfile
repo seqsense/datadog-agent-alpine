@@ -80,10 +80,9 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
 
 WORKDIR /build/datadog-agent
 
-RUN \
+RUN DD_AGENT_PIP_REQUIREMENTS="$(sed '/^#/d;s|^-r \(https://\)|\1|' requirements.txt)" \
   DD_MAJOR=$(echo ${DATADOG_VERSION} | cut -d '.' -f 1) \
   DD_MINOR=$(echo ${DATADOG_VERSION} | cut -d '.' -f 2) \
-  DD_AGENT_PIP_REQUIREMENTS="$(sed '/^#/d;s|^-r \(https://\)|\1|' requirements.txt)" \
   && if [ "$(sed '/^#/d' requirements.txt | wc -l)" -ne 1 ] || [ $(echo "${DD_AGENT_PIP_REQUIREMENTS}" | wc -l) -ne 1 ]; then \
     echo 'Dependency management strategy is changed on upstream' >&2; \
     false; \
