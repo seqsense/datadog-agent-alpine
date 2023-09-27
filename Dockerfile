@@ -87,15 +87,12 @@ RUN DD_AGENT_PIP_REQUIREMENTS="$(sed -n 's|^-r \(https://\)|\1|p' requirements.t
     echo 'Dependency management strategy is changed on upstream' >&2; \
     false; \
   fi \
-  && while true; do \
+  && while [ ${DD_MINOR} -gt 0 ]; do \
     URL=$(echo ${DD_AGENT_PIP_REQUIREMENTS} | sed "s|\(datadog-agent-buildimages\)/main|\1/${DD_MAJOR}.${DD_MINOR}.x|"); \
     if curl --fail -s ${URL} > requirements.txt; then \
       break; \
     fi; \
     DD_MINOR=$((DD_MINOR - 1)); \
-    if [ ${DD_MINOR} -eq 0 ]; then \
-      exit 1; \
-    fi; \
   done \
   && for d in \
       PyYAML \
