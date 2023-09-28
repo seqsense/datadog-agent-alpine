@@ -50,7 +50,7 @@ RUN strip -s /usr/local/lib/libsystemd.so.${SYSTEMD_LIB_VERSION}
 
 
 # ===========================
-FROM golang:1.20-alpine3.17 AS agent-builder
+FROM golang:1.21-alpine3.17 AS agent-builder
 
 RUN apk add --no-cache \
     aws-cli \
@@ -86,18 +86,19 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
 WORKDIR /build/datadog-agent
 
 RUN DD_AGENT_PIP_REQUIREMENTS="$(sed -n 's|^-r \(https://\)|\1|p' requirements.txt)" \
+  DD_MAJOR=$(echo ${DATADOG_VERSION} | cut -d '.' -f 1) \
+  DD_MINOR=$(echo ${DATADOG_VERSION} | cut -d '.' -f 2) \
   && if [ $(echo "${DD_AGENT_PIP_REQUIREMENTS}" | wc -l) -ne 1 ]; then \
-      echo 'Dependency management strategy is changed on upstream' >&2; \
-      false; \
-    fi \
-  && echo "---1" \
-  && cat requirements.txt \
-  && echo "---2" \
-  && curl -s ${DD_AGENT_PIP_REQUIREMENTS} >> requirements.txt \
-  && echo "---3" \
-  && cat requirements.txt \
-  && echo "---4" \
-  && sed -i '/^#/d;/^-r/d' requirements.txt \
+    echo 'Dependency management strategy is changed on upstream' >&2; \
+    false; \
+  fi \
+  && while [ ${DD_MINOR} -gt 0 ]; do \
+    URL=$(echo ${DD_AGENT_PIP_REQUIREMENTS} | sed "s|\(datadog-agent-buildimages\)/main|\1/${DD_MAJOR}.${DD_MINOR}.x|"); \
+    if curl --fail -s ${URL} > requirements.txt; then \
+      break; \
+    fi; \
+    DD_MINOR=$((DD_MINOR - 1)); \
+  done \
   && for d in \
       PyYAML \
       awscli \
