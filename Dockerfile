@@ -112,9 +112,6 @@ RUN DD_AGENT_PIP_REQUIREMENTS="$(sed -n 's|^-r \(https://\)|\1|p' requirements.t
     ; do \
       sed "/^$d=/d" -i requirements.txt; \
     done \
-  && echo "---5" \
-  && cat requirements.txt \
-  && echo "---6" \
   && python3 -m pip install -r requirements.txt
 RUN invoke deps
 
