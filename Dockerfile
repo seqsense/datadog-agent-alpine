@@ -84,6 +84,8 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
   && git checkout refs/tags/${DATADOG_VERSION}
 
 WORKDIR /build/datadog-agent
+COPY fix-journald-initial-seek.patch .
+RUN patch -p1 < fix-journald-initial-seek.patch
 
 RUN DD_AGENT_PIP_REQUIREMENTS="$(sed -n 's|^-r \(https://\)|\1|p' requirements.txt)" \
   DD_MAJOR=$(echo ${DATADOG_VERSION} | cut -d '.' -f 1) \
