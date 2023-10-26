@@ -44,6 +44,7 @@ RUN git clone --depth=1 https://github.com/DataDog/integrations-core.git /tmp/in
     pip==$(version py3-pip) \
     regex==$(version py3-regex) \
     "/tmp/integrations-core/datadog_checks_dev[cli]" \
+    "/tmp/integrations-core/ddev" \
   && rm -rf /tmp/integrations-core
 
 CMD ["/bin/sh"]
