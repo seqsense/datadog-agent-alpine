@@ -1,0 +1,14 @@
+diff --git a/datadog_checks_dev/pyproject.toml b/datadog_checks_dev/pyproject.toml
+index 7acf291a1..2b6a84931 100644
+--- a/datadog_checks_dev/pyproject.toml
++++ b/datadog_checks_dev/pyproject.toml
+@@ -99,6 +99,9 @@ datadog_checks = "datadog_checks.dev.plugin.pytest"
+ [project.entry-points.tox]
+ datadog_checks = "datadog_checks.dev.plugin.tox"
+ 
++[project.scripts]
++ddev = "datadog_checks.dev.tooling.cli:ddev"
++
+ [project.urls]
+ Source = "https://github.com/DataDog/integrations-core"
+ 
