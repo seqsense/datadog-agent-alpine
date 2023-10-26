@@ -64,14 +64,19 @@ RUN apk add --no-cache \
     make \
     musl-dev \
     patch \
+    py3-boto3 \
+    py3-botocore \
+    py3-dulwich \
     py3-packaging \
     py3-pip \
     py3-requests \
+    py3-semver \
     py3-toml \
     py3-wheel \
+    py3-yaml \
     python3-dev
 
-ARG DATADOG_VERSION=7.46.0
+ARG DATADOG_VERSION=7.47.0
 # datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
 RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent \
   && cd /build/datadog-agent \
@@ -97,8 +102,12 @@ RUN DD_AGENT_PIP_REQUIREMENTS="$(sed -n 's|^-r \(https://\)|\1|p' requirements.t
   && for d in \
       PyYAML \
       awscli \
+      dulwich \
       packaging \
+      boto3 \
+      botocore \
       requests \
+      semver \
       toml \
     ; do \
       sed "/^$d=/d" -i requirements.txt; \
@@ -110,9 +119,7 @@ ENV CGO_CFLAGS="-Os -I/build/datadog-agent/dev/include" \
   CGO_LDFLAGS="-L/build/datadog-agent/dev/lib" \
   GOFLAGS="-ldflags=-w -ldflags=-s"
 
-COPY disable-execinfo-for-musl.patch .
-RUN patch -p1 < disable-execinfo-for-musl.patch \
-  && invoke rtloader.make \
+RUN invoke rtloader.make \
     --python-runtimes=3 \
     --cmake-options="\
       -DCMAKE_INSTALL_LIBDIR=lib \
@@ -281,7 +288,7 @@ ARG INTEGRATIONS_CORE="\
   system_core \
   system_swap"
 
-ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.46.0
+ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.47.0
 RUN apk add --virtual .build-deps \
     g++ \
     gcc \
@@ -331,7 +338,7 @@ EXPOSE 8125/udp 8126/tcp
 HEALTHCHECK --interval=30s --timeout=5s --retries=2 \
   CMD ["/probe.sh"]
 
-ARG DATADOG_VERSION=7.46.0
+ARG DATADOG_VERSION=7.47.0
 ENV DATADOG_INTEGRATIONS_CORE_VERSION=${DATADOG_INTEGRATIONS_CORE_VERSION} \
   DATADOG_VERSION=${DATADOG_VERSION}
 
