@@ -54,6 +54,7 @@ FROM golang:1.21-alpine3.17 AS agent-builder
 
 RUN apk add --no-cache \
     aws-cli \
+    bash \
     ca-certificates \
     cmake \
     curl \
