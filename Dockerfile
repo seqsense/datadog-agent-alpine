@@ -88,20 +88,12 @@ WORKDIR /build/datadog-agent
 COPY fix-journald-initial-seek.patch .
 RUN patch -p1 < fix-journald-initial-seek.patch
 
-RUN DD_AGENT_PIP_REQUIREMENTS="$(sed -n 's|^-r \(https://\)|\1|p' requirements.txt)" \
-  DD_MAJOR=$(echo ${DATADOG_VERSION} | cut -d '.' -f 1) \
-  DD_MINOR=$(echo ${DATADOG_VERSION} | cut -d '.' -f 2) \
-  && if [ $(echo "${DD_AGENT_PIP_REQUIREMENTS}" | wc -l) -ne 1 ]; then \
-    echo 'Dependency management strategy is changed on upstream' >&2; \
-    false; \
-  fi \
-  && while [ ${DD_MINOR} -gt 0 ]; do \
-    URL=$(echo ${DD_AGENT_PIP_REQUIREMENTS} | sed "s|\(datadog-agent-buildimages\)/main|\1/${DD_MAJOR}.${DD_MINOR}.x|"); \
-    if curl --fail -s ${URL} > requirements.txt; then \
-      break; \
-    fi; \
-    DD_MINOR=$((DD_MINOR - 1)); \
-  done \
+ARG DATADOG_AGENT_BUILDIMAGES_VERSION=a916f5e0836ec4a24f6b65b7c449e5126d26b913
+RUN mkdir -p buildimages \
+  && git -C buildimages init \
+  && git -C buildimages remote add origin https://github.com/DataDog/datadog-agent-buildimages.git \
+  && git -C buildimages fetch --depth 1 origin ${DATADOG_AGENT_BUILDIMAGES_VERSION} \
+  && git -C buildimages checkout FETCH_HEAD \
   && for d in \
       PyYAML \
       awscli \
@@ -113,8 +105,9 @@ RUN DD_AGENT_PIP_REQUIREMENTS="$(sed -n 's|^-r \(https://\)|\1|p' requirements.t
       semver \
       toml \
     ; do \
-      sed "/^$d=/d" -i requirements.txt; \
+      sed "/^$d=/d" -i $(find buildimages -name requirements.txt); \
     done \
+  && sed 's|-r .*/DataDog/datadog-agent-buildimages/main/requirements.txt|-r buildimages/requirements.txt|' -i requirements.txt \
   && python3 -m pip install -r requirements.txt
 RUN invoke deps
 
