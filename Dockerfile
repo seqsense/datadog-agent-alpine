@@ -77,7 +77,7 @@ RUN apk add --no-cache \
     py3-yaml \
     python3-dev
 
-ARG DATADOG_VERSION=7.49.0
+ARG DATADOG_VERSION=7.50.2
 # datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
 RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent \
   && cd /build/datadog-agent \
@@ -85,8 +85,6 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
   && git checkout refs/tags/${DATADOG_VERSION}
 
 WORKDIR /build/datadog-agent
-COPY fix-journald-initial-seek.patch .
-RUN patch -p1 < fix-journald-initial-seek.patch
 
 ARG DATADOG_AGENT_BUILDIMAGES_VERSION=a916f5e0836ec4a24f6b65b7c449e5126d26b913
 RUN mkdir -p buildimages \
@@ -284,7 +282,7 @@ ARG INTEGRATIONS_CORE="\
   system_core \
   system_swap"
 
-ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.49.0
+ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.50.2
 RUN apk add --virtual .build-deps \
     g++ \
     gcc \
@@ -334,7 +332,7 @@ EXPOSE 8125/udp 8126/tcp
 HEALTHCHECK --interval=30s --timeout=5s --retries=2 \
   CMD ["/probe.sh"]
 
-ARG DATADOG_VERSION=7.49.0
+ARG DATADOG_VERSION=7.50.2
 ENV DATADOG_INTEGRATIONS_CORE_VERSION=${DATADOG_INTEGRATIONS_CORE_VERSION} \
   DATADOG_VERSION=${DATADOG_VERSION}
 
