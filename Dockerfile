@@ -315,7 +315,6 @@ RUN apk add --virtual .build-deps \
     g++ \
     gcc \
     git \
-    krb5-dev \
     linux-headers \
     musl-dev \
     python3-dev \
