@@ -85,8 +85,6 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
   && git checkout refs/tags/${DATADOG_VERSION}
 
 WORKDIR /build/datadog-agent
-COPY fix-journald-initial-seek.patch .
-RUN patch -p1 < fix-journald-initial-seek.patch
 
 ARG DATADOG_AGENT_BUILDIMAGES_VERSION=a916f5e0836ec4a24f6b65b7c449e5126d26b913
 RUN mkdir -p buildimages \
