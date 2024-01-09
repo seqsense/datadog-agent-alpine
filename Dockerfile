@@ -99,14 +99,14 @@ ARG CI_ONLY_DEPS=" \
   reno \
 "
 ARG SYSTEM_PYTHON_DEPS=" \
-  PyYAML \
   awscli \
-  docker \
-  dulwich \
-  packaging \
   boto3 \
   botocore \
+  docker \
+  dulwich \
   isort \
+  packaging \
+  pyyaml \
   requests \
   ruamel.yaml \
   semver \
@@ -121,7 +121,7 @@ RUN mkdir -p buildimages \
   && git -C buildimages fetch --depth 1 origin ${DATADOG_AGENT_BUILDIMAGES_VERSION} \
   && git -C buildimages checkout FETCH_HEAD \
   && for d in ${CI_ONLY_DEPS} ${SYSTEM_PYTHON_DEPS}; do \
-      sed "/^$d\(=\|$\)/d" -i requirements.txt buildimages/requirements.txt buildimages/requirements/constraints.txt; \
+      sed "/^$d\(=\|$\)/di" -i requirements.txt buildimages/requirements.txt buildimages/requirements/constraints.txt; \
     done \
   && sed 's|-r .*/DataDog/datadog-agent-buildimages/main/requirements.txt|-r buildimages/requirements.txt|' -i requirements.txt \
   && python3 -m pip install -r requirements.txt --break-system-packages
@@ -224,6 +224,8 @@ RUN apk add \
     lz4-libs \
     openssl-dev \
     py3-cryptography \
+    py3-jellyfish \
+    py3-python-gssapi \
     py3-packaging \
     py3-pip \
     py3-prometheus-client \
@@ -232,8 +234,12 @@ RUN apk add \
     py3-pysocks \
     py3-requests \
     py3-requests-toolbelt \
+    py3-rpds-py \
+    py3-simplejson \
     py3-six \
     py3-wheel \
+    py3-wrapt \
+    py3-yaml \
     python3 \
     xz-libs \
     zstd-libs \
@@ -316,16 +322,23 @@ RUN apk add --virtual .build-deps \
   && for d in \
       botocore \
       cryptography \
+      gssapi \
+      jellyfish \
       prometheus-client \
       protobuf \
       pysocks \
+      pyyaml \
       requests \
       requests_toolbelt \
+      simplejson \
       six \
+      wheel \
+      wrapt \
     ; do \
-      sed "/\"$d=/d" -i datadog_checks_base/pyproject.toml; \
+      sed "/\"$d=/di" -i datadog_checks_base/pyproject.toml; \
     done \
   && python3 -m pip install \
+    --break-system-packages \
     "./datadog_checks_base[deps, http]" \
     $(echo ${INTEGRATIONS_CORE} | xargs -n1 echo | sed 's|^|./|') \
   && apk del --force-broken-world .build-deps \
