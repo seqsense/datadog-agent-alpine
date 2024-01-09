@@ -37,6 +37,28 @@
       "depNameTemplate": "just-containers/s6-overlay",
       "versioningTemplate": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(\\.(?<build>\\d+))?$",
       "lookupNameTemplate": "just-containers/s6-overlay"
+    },
+    {
+      "fileMatch": [
+        "^Dockerfile$"
+      ],
+      "matchStrings": [
+        "ARG ALPINE_VERSION=(?<currentValue>[0-9.]+)"
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "alpine",
+      "versioningTemplate": "docker"
+    },
+    {
+      "fileMatch": [
+        "^Dockerfile$"
+      ],
+      "matchStrings": [
+        "ARG GOLANG_VERSION=(?<currentValue>[0-9.]+)"
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "golang",
+      "versioningTemplate": "docker"
     }
   ],
   "packageRules": [
