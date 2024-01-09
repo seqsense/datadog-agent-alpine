@@ -67,12 +67,17 @@ RUN apk add --no-cache \
     patch \
     py3-boto3 \
     py3-botocore \
+    py3-docker-py \
     py3-dulwich \
+    py3-isort \
     py3-packaging \
     py3-pip \
+    py3-prompt_toolkit \
     py3-requests \
+    py3-ruamel.yaml \
     py3-semver \
     py3-toml \
+    py3-urllib3=~1 \
     py3-wheel \
     py3-yaml \
     python3-dev
@@ -86,27 +91,40 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
 
 WORKDIR /build/datadog-agent
 
-ARG DATADOG_AGENT_BUILDIMAGES_VERSION=a916f5e0836ec4a24f6b65b7c449e5126d26b913
+ARG DATADOG_AGENT_BUILDIMAGES_VERSION=b45ddae424d22a220e855533be5b197edfa1451d
+
+ARG CI_ONLY_DEPS=" \
+  codeowners \
+  docker-squash \
+  reno \
+"
+ARG SYSTEM_PYTHON_DEPS=" \
+  PyYAML \
+  awscli \
+  docker \
+  dulwich \
+  packaging \
+  boto3 \
+  botocore \
+  isort \
+  requests \
+  ruamel.yaml \
+  semver \
+  toml \
+  urllib3 \
+  wheel \
+"
+
 RUN mkdir -p buildimages \
   && git -C buildimages init \
   && git -C buildimages remote add origin https://github.com/DataDog/datadog-agent-buildimages.git \
   && git -C buildimages fetch --depth 1 origin ${DATADOG_AGENT_BUILDIMAGES_VERSION} \
   && git -C buildimages checkout FETCH_HEAD \
-  && for d in \
-      PyYAML \
-      awscli \
-      dulwich \
-      packaging \
-      boto3 \
-      botocore \
-      requests \
-      semver \
-      toml \
-    ; do \
-      sed "/^$d=/d" -i $(find buildimages -name requirements.txt); \
+  && for d in ${CI_ONLY_DEPS} ${SYSTEM_PYTHON_DEPS}; do \
+      sed "/^$d\(=\|$\)/d" -i requirements.txt buildimages/requirements.txt buildimages/requirements/constraints.txt; \
     done \
   && sed 's|-r .*/DataDog/datadog-agent-buildimages/main/requirements.txt|-r buildimages/requirements.txt|' -i requirements.txt \
-  && python3 -m pip install -r requirements.txt
+  && python3 -m pip install -r requirements.txt --break-system-packages
 RUN invoke deps
 
 ENV CGO_CFLAGS="-Os -I/build/datadog-agent/dev/include" \
