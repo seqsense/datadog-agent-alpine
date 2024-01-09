@@ -1,4 +1,4 @@
-FROM alpine:3.18 as systemd-builder
+FROM alpine:3.19 as systemd-builder
 
 RUN apk add --no-cache \
     autoconf \
@@ -192,7 +192,7 @@ RUN rm -rf \
 
 
 # ===========================
-FROM alpine:3.18 AS datadog-agent
+FROM alpine:3.19 AS datadog-agent
 
 RUN apk add \
     aws-cli \
