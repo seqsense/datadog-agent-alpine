@@ -50,7 +50,7 @@ RUN strip -s /usr/local/lib/libsystemd.so.${SYSTEMD_LIB_VERSION}
 
 
 # ===========================
-FROM golang:1.21-alpine3.17 AS agent-builder
+FROM golang:1.21-alpine3.18 AS agent-builder
 
 RUN apk add --no-cache \
     aws-cli \
