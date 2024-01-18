@@ -1,4 +1,4 @@
-ARG ALPINE_VERSION=3.19
+ARG ALPINE_VERSION=3.18
 ARG GOLANG_VERSION=1.21
 
 # ===========================
@@ -238,7 +238,6 @@ RUN apk add \
     py3-pysocks \
     py3-requests \
     py3-requests-toolbelt \
-    py3-rpds-py \
     py3-simplejson \
     py3-six \
     py3-wheel \
