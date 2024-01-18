@@ -60,4 +60,4 @@ show-image-full-tag:
 
 .PHONY: show-image-full-tag-with-alpine-version
 show-image-full-tag-with-alpine-version:
-	@echo "full_tag_with_alpine_version=$(NAME):$$(docker run --rm --entrypoint /opt/datadog-agent/bin/agent/agent $(NAME):$(TAG) version -n | cut -f2 -d" ")$(TAG_SUFFIX)$$(docker run -it --rm --entrypoint sh $(NAME):$(TAG) -c '. /etc/os-release; echo $${VERSION_ID} | head -n1 | cut -d"." -f1-2')" | tee -a ${GITHUB_OUTPUT}
+	@echo "full_tag_with_alpine_version=$(NAME):$$(docker run --rm --entrypoint /opt/datadog-agent/bin/agent/agent $(NAME):$(TAG) version -n | cut -f2 -d" ")$(TAG_SUFFIX)$$(docker run --rm --entrypoint sh $(NAME):$(TAG) -c '. /etc/os-release; echo $${VERSION_ID} | head -n1 | cut -d"." -f1-2')" | tee -a ${GITHUB_OUTPUT}
