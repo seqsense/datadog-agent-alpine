@@ -82,7 +82,9 @@ jobs:
         run: make docker-build BUILD_OPTS="${BUILD_OPTS}"
       - name: Get image tag
         id: full-tag
-        run: make show-image-full-tag
+        run: |
+          make show-image-full-tag
+          make show-image-full-tag-with-alpine-version
 
       - name: Build integrations-builder
         if: env.ENABLE_BUILD_INTEGRATIONS_BUILDER == 1
@@ -126,6 +128,11 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}
           docker tag \
             ${{ steps.tag.outputs.tag }} \
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag_with_alpine_version }}
+          docker push \
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag_with_alpine_version }}
+          docker tag \
+            ${{ steps.tag.outputs.tag }} \
             ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}
           docker push \
             ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}
@@ -138,6 +145,11 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}-integrations-builder
           docker push \
             ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}-integrations-builder
+          docker tag \
+            ${{ steps.tag.outputs.tag }}-integrations-builder \
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag_with_alpine_version }}-integrations-builder
+          docker push \
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag_with_alpine_version }}-integrations-builder
 
       - name: Notify failure
         uses: seqsense/sq-actions/notify-branch-build@main
