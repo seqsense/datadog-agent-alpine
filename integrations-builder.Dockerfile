@@ -34,7 +34,7 @@ RUN git clone --depth=1 https://github.com/DataDog/integrations-core.git /tmp/in
   && git checkout refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
   && version() { apk info $1 2> /dev/null | sed -n 's/\S\+-\([0-9\.]\+\)-r[0-9]\+ description:/\1/p'; } \
   && . ${HOME}/.cargo/env \
-  && python3 -m pip install \
+  && python3 -m pip install --break-system-packages \
     aiohttp==$(version py3-aiohttp) \
     bcrypt==$(version py3-bcrypt) \
     cryptography==$(version py3-cryptography) \

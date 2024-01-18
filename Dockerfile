@@ -1,4 +1,4 @@
-ARG ALPINE_VERSION=3.18
+ARG ALPINE_VERSION=3.19
 ARG GOLANG_VERSION=1.21
 
 # ===========================
@@ -28,9 +28,9 @@ RUN apk add --no-cache \
     xz-dev \
     zstd-dev
 
-ARG SYSTEMD_VERSION=v250.5
-ARG SYSTEMD_LIB_VERSION=0.33.0
-ARG OPENEMBEDDED_CORE_SHA=20a7ab9ff6ed777c6617a338d049ebe03fcc588c
+ARG SYSTEMD_VERSION=v254.4
+ARG SYSTEMD_LIB_VERSION=0.37.0
+ARG OPENEMBEDDED_CORE_SHA=8063bcb2d4fcfeded5edac3b0895151e8dc8bf0f
 
 ENV CFLAGS=-Os
 WORKDIR /work/systemd
@@ -71,12 +71,17 @@ RUN apk add --no-cache \
     patch \
     py3-boto3 \
     py3-botocore \
+    py3-docker-py \
     py3-dulwich \
+    py3-isort \
     py3-packaging \
     py3-pip \
+    py3-prompt_toolkit \
     py3-requests \
+    py3-ruamel.yaml \
     py3-semver \
     py3-toml \
+    py3-urllib3=~1 \
     py3-wheel \
     py3-yaml \
     python3-dev
@@ -90,27 +95,40 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
 
 WORKDIR /build/datadog-agent
 
-ARG DATADOG_AGENT_BUILDIMAGES_VERSION=a916f5e0836ec4a24f6b65b7c449e5126d26b913
+ARG DATADOG_AGENT_BUILDIMAGES_VERSION=b45ddae424d22a220e855533be5b197edfa1451d
+
+ARG CI_ONLY_DEPS=" \
+  codeowners \
+  docker-squash \
+  reno \
+"
+ARG SYSTEM_PYTHON_DEPS=" \
+  awscli \
+  boto3 \
+  botocore \
+  docker \
+  dulwich \
+  isort \
+  packaging \
+  pyyaml \
+  requests \
+  ruamel.yaml \
+  semver \
+  toml \
+  urllib3 \
+  wheel \
+"
+
 RUN mkdir -p buildimages \
   && git -C buildimages init \
   && git -C buildimages remote add origin https://github.com/DataDog/datadog-agent-buildimages.git \
   && git -C buildimages fetch --depth 1 origin ${DATADOG_AGENT_BUILDIMAGES_VERSION} \
   && git -C buildimages checkout FETCH_HEAD \
-  && for d in \
-      PyYAML \
-      awscli \
-      dulwich \
-      packaging \
-      boto3 \
-      botocore \
-      requests \
-      semver \
-      toml \
-    ; do \
-      sed "/^$d=/d" -i $(find buildimages -name requirements.txt); \
+  && for d in ${CI_ONLY_DEPS} ${SYSTEM_PYTHON_DEPS}; do \
+      sed "/^$d\(=\|$\)/di" -i requirements.txt buildimages/requirements.txt buildimages/requirements/constraints.txt; \
     done \
   && sed 's|-r .*/DataDog/datadog-agent-buildimages/main/requirements.txt|-r buildimages/requirements.txt|' -i requirements.txt \
-  && python3 -m pip install -r requirements.txt
+  && python3 -m pip install -r requirements.txt --break-system-packages
 RUN invoke deps
 
 ENV CGO_CFLAGS="-Os -I/build/datadog-agent/dev/include" \
@@ -210,6 +228,8 @@ RUN apk add \
     lz4-libs \
     openssl-dev \
     py3-cryptography \
+    py3-jellyfish \
+    py3-python-gssapi \
     py3-packaging \
     py3-pip \
     py3-prometheus-client \
@@ -218,8 +238,12 @@ RUN apk add \
     py3-pysocks \
     py3-requests \
     py3-requests-toolbelt \
+    py3-rpds-py \
+    py3-simplejson \
     py3-six \
     py3-wheel \
+    py3-wrapt \
+    py3-yaml \
     python3 \
     xz-libs \
     zstd-libs \
@@ -291,7 +315,6 @@ RUN apk add --virtual .build-deps \
     g++ \
     gcc \
     git \
-    krb5-dev \
     linux-headers \
     musl-dev \
     python3-dev \
@@ -302,16 +325,23 @@ RUN apk add --virtual .build-deps \
   && for d in \
       botocore \
       cryptography \
+      gssapi \
+      jellyfish \
       prometheus-client \
       protobuf \
       pysocks \
+      pyyaml \
       requests \
       requests_toolbelt \
+      simplejson \
       six \
+      wheel \
+      wrapt \
     ; do \
-      sed "/\"$d=/d" -i datadog_checks_base/pyproject.toml; \
+      sed "/\"$d=/di" -i datadog_checks_base/pyproject.toml; \
     done \
   && python3 -m pip install \
+    --break-system-packages \
     "./datadog_checks_base[deps, http]" \
     $(echo ${INTEGRATIONS_CORE} | xargs -n1 echo | sed 's|^|./|') \
   && apk del --force-broken-world .build-deps \
