@@ -1,4 +1,4 @@
-ARG ALPINE_VERSION=3.18
+ARG ALPINE_VERSION=3.19
 ARG GOLANG_VERSION=1.22
 
 # ===========================
@@ -250,6 +250,8 @@ RUN apk add \
   && find /usr -name "*.pyc" -delete \
   && find /usr -name "__pycache__" -delete
 
+RUN echo -e "[global]\nbreak-system-packages = true" >> /etc/pip.conf
+
 ARG S6_OVERLAY_VERSION=2.1.0.2
 RUN wget https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-amd64.tar.gz \
   && tar xzf /s6-overlay-amd64.tar.gz \
@@ -340,7 +342,6 @@ RUN apk add --virtual .build-deps \
       sed "/\"$d=/di" -i datadog_checks_base/pyproject.toml; \
     done \
   && python3 -m pip install \
-    --break-system-packages \
     "./datadog_checks_base[deps, http]" \
     $(echo ${INTEGRATIONS_CORE} | xargs -n1 echo | sed 's|^|./|') \
   && apk del --force-broken-world .build-deps \
