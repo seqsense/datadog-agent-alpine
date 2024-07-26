@@ -95,7 +95,7 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
 
 WORKDIR /build/datadog-agent
 
-ARG DATADOG_AGENT_BUILDIMAGES_VERSION=b45ddae424d22a220e855533be5b197edfa1451d
+ARG DATADOG_AGENT_BUILDIMAGES_VERSION=bf31b4201bf857cb83549e71913c19cf077861aa
 
 ARG CI_ONLY_DEPS=" \
   codeowners \
