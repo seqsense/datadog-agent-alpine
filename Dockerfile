@@ -86,7 +86,7 @@ RUN apk add --no-cache \
     py3-yaml \
     python3-dev
 
-ARG DATADOG_VERSION=7.57.1
+ARG DATADOG_VERSION=7.60.1
 # datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
 RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent \
   && cd /build/datadog-agent \
@@ -136,7 +136,6 @@ ENV CGO_CFLAGS="-Os -I/build/datadog-agent/dev/include" \
   GOFLAGS="-ldflags=-w -ldflags=-s"
 
 RUN invoke rtloader.make \
-    --python-runtimes=3 \
     --cmake-options="\
       -DCMAKE_INSTALL_LIBDIR=lib \
       -DCMAKE_CXX_FLAGS=-Os \
@@ -148,7 +147,6 @@ RUN strip -s /build/datadog-agent/dev/lib/*.so
 COPY --from=systemd-builder /work/systemd/src/systemd/ /usr/include/systemd/
 
 RUN invoke agent.build \
-    --python-runtimes=3 \
     --exclude-rtloader \
     --build-exclude=jmx,kubeapiserver,gce,ec2,orchestrator
 
@@ -159,8 +157,7 @@ RUN mkdir -p /agent-bin \
 ARG ENABLE_PROCESS_AGENT=0
 RUN set -eu; \
   if [ ${ENABLE_PROCESS_AGENT} -eq 1 ]; then \
-    invoke process-agent.build \
-      --python-runtimes=3; \
+    invoke process-agent.build; \
     mv bin/process-agent/process-agent /agent-bin/; \
   fi
 
@@ -174,8 +171,7 @@ RUN set -eu; \
 ARG ENABLE_TRACE_AGENT=0
 RUN set -eu; \
   if [ ${ENABLE_TRACE_AGENT} -eq 1 ]; then \
-    invoke trace-agent.build \
-      --python-runtimes=3; \
+    invoke trace-agent.build; \
     mv bin/trace-agent/trace-agent /agent-bin/; \
   fi
 
@@ -311,7 +307,7 @@ ARG INTEGRATIONS_CORE="\
   system_core \
   system_swap"
 
-ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.57.1
+ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.60.1
 RUN apk add --virtual .build-deps \
     g++ \
     gcc \
@@ -366,7 +362,7 @@ EXPOSE 8125/udp 8126/tcp
 HEALTHCHECK --interval=30s --timeout=5s --retries=2 \
   CMD ["/probe.sh"]
 
-ARG DATADOG_VERSION=7.57.1
+ARG DATADOG_VERSION=7.60.1
 ENV DATADOG_INTEGRATIONS_CORE_VERSION=${DATADOG_INTEGRATIONS_CORE_VERSION} \
   DATADOG_VERSION=${DATADOG_VERSION}
 
