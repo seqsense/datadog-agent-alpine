@@ -1,0 +1,130 @@
+diff --git a/cmd/system-probe/modules/all_linux.go b/cmd/system-probe/modules/all_linux.go
+index 79b6f3d74a..75198e4b50 100644
+--- a/cmd/system-probe/modules/all_linux.go
++++ b/cmd/system-probe/modules/all_linux.go
+@@ -3,7 +3,7 @@
+ // This product includes software developed at Datadog (https://www.datadoghq.com/).
+ // Copyright 2016-present Datadog, Inc.
+ 
+-//go:build linux && !arm64
++//go:build linux && !arm64 && !nonglibc
+ 
+ // Package modules is all the module definitions for system-probe
+ package modules
+diff --git a/cmd/system-probe/modules/all_linux_arm64.go b/cmd/system-probe/modules/all_linux_arm64.go
+index e5a81541e5..663d2c804f 100644
+--- a/cmd/system-probe/modules/all_linux_arm64.go
++++ b/cmd/system-probe/modules/all_linux_arm64.go
+@@ -3,7 +3,7 @@
+ // This product includes software developed at Datadog (https://www.datadoghq.com/).
+ // Copyright 2024-present Datadog, Inc.
+ 
+-//go:build linux && arm64
++//go:build linux && arm64 && !nonglibc
+ 
+ // Package modules is all the module definitions for system-probe
+ package modules
+diff --git a/cmd/system-probe/modules/gpu.go b/cmd/system-probe/modules/gpu.go
+index 7ec273e7c2..d009389b1c 100644
+--- a/cmd/system-probe/modules/gpu.go
++++ b/cmd/system-probe/modules/gpu.go
+@@ -3,7 +3,7 @@
+ // This product includes software developed at Datadog (https://www.datadoghq.com/).
+ // Copyright 2024-present Datadog, Inc.
+ 
+-//go:build linux
++//go:build linux && !nonglibc
+ 
+ package modules
+ 
+diff --git a/pkg/collector/corechecks/gpu/gpu.go b/pkg/collector/corechecks/gpu/gpu.go
+index 1083db30ad..092a3b3b1f 100644
+--- a/pkg/collector/corechecks/gpu/gpu.go
++++ b/pkg/collector/corechecks/gpu/gpu.go
+@@ -3,7 +3,7 @@
+ // This product includes software developed at Datadog (https://www.datadoghq.com/).
+ // Copyright 2024-present Datadog, Inc.
+ 
+-//go:build linux
++//go:build linux && !nonglibc
+ 
+ package gpu
+ 
+diff --git a/pkg/collector/corechecks/gpu/gpu_stub.go b/pkg/collector/corechecks/gpu/gpu_stub.go
+index 5aefc60217..c507f2a843 100644
+--- a/pkg/collector/corechecks/gpu/gpu_stub.go
++++ b/pkg/collector/corechecks/gpu/gpu_stub.go
+@@ -3,7 +3,7 @@
+ // This product includes software developed at Datadog (https://www.datadoghq.com/).
+ // Copyright 2024-present Datadog, Inc.
+ 
+-//go:build !linux
++//go:build !linux || nonglibc
+ 
+ package gpu
+ 
+diff --git a/tasks/agent.py b/tasks/agent.py
+index b0220fcb60..bec7654b48 100644
+--- a/tasks/agent.py
++++ b/tasks/agent.py
+@@ -140,6 +140,7 @@ def build(
+     bundle_ebpf=False,
+     agent_bin=None,
+     run_on=None,  # noqa: U100, F841. Used by the run_on_devcontainer decorator
++    non_glibc=False,
+ ):
+     """
+     Build the agent. If the bits to include in the build are not specified,
+@@ -213,6 +214,9 @@ def build(
+             all_tags |= set(build_tags)
+         build_tags = list(all_tags)
+ 
++    if non_glibc:
++        build_tags.append("nonglibc")
++
+     cmd = "go build -mod={go_mod} {race_opt} {build_type} -tags \"{go_build_tags}\" "
+ 
+     if not agent_bin:
+diff --git a/tasks/system_probe.py b/tasks/system_probe.py
+index 5ddffee149..6da208b6d2 100644
+--- a/tasks/system_probe.py
++++ b/tasks/system_probe.py
+@@ -684,10 +684,12 @@ def build(
+     with_unit_test=False,
+     ebpf_compiler='clang',
+     static=False,
++    non_glibc=False,
+ ):
+     """
+     Build the system-probe
+     """
++    raise NameError('test')
+     if not is_macos:
+         build_object_files(
+             ctx,
+@@ -710,6 +712,7 @@ def build(
+         strip_binary=strip_binary,
+         arch=arch,
+         static=static,
++        non_glibc=non_glibc,
+     )
+ 
+ 
+@@ -737,6 +740,7 @@ def build_sysprobe_binary(
+     strip_binary=False,
+     fips_mode=False,
+     static=False,
++    non_glibc=False,
+ ) -> None:
+     arch_obj = Arch.from_str(arch)
+ 
+@@ -759,6 +763,9 @@ def build_sysprobe_binary(
+         build_tags.extend(["osusergo", "netgo"])
+         build_tags = list(set(build_tags).difference({"netcgo"}))
+ 
++    if non_glibc:
++        build_tags.append("nonglibc")
++
+     if not is_windows and "pcap" in build_tags:
+         build_libpcap(ctx)
+         cgo_flags = get_libpcap_cgo_flags(ctx, install_path)

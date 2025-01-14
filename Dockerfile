@@ -146,7 +146,11 @@ RUN strip -s /build/datadog-agent/dev/lib/*.so
 
 COPY --from=systemd-builder /work/systemd/src/systemd/ /usr/include/systemd/
 
+COPY disable-gpu-module.patch /
+RUN patch -p1 < /disable-gpu-module.patch
+
 RUN invoke agent.build \
+    --non-glibc \
     --exclude-rtloader \
     --build-exclude=jmx,kubeapiserver,gce,ec2,orchestrator
 
