@@ -150,7 +150,7 @@ COPY disable-gpu-module.patch /
 RUN patch -p1 < /disable-gpu-module.patch
 
 RUN invoke agent.build \
-    --non-glibc \
+    --no-glibc \
     --exclude-rtloader \
     --build-exclude=jmx,kubeapiserver,gce,ec2,orchestrator
 
