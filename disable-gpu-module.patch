@@ -1,5 +1,5 @@
 diff --git a/cmd/system-probe/modules/all_linux.go b/cmd/system-probe/modules/all_linux.go
-index 79b6f3d74a..75198e4b50 100644
+index 79b6f3d74a..0da0a6818a 100644
 --- a/cmd/system-probe/modules/all_linux.go
 +++ b/cmd/system-probe/modules/all_linux.go
 @@ -3,7 +3,7 @@
@@ -7,12 +7,20 @@ index 79b6f3d74a..75198e4b50 100644
  // Copyright 2016-present Datadog, Inc.
  
 -//go:build linux && !arm64
-+//go:build linux && !arm64 && !nonglibc
++//go:build linux && !arm64 && !glibc
  
  // Package modules is all the module definitions for system-probe
  package modules
+@@ -30,7 +30,6 @@ var All = []module.Factory{
+ 	Pinger,
+ 	Traceroute,
+ 	DiscoveryModule,
+-	GPUMonitoring, // GPU monitoring needs to be initialized afer EventMonitor, so that we have the event consumer ready
+ }
+ 
+ func inactivityEventLog(_ time.Duration) {
 diff --git a/cmd/system-probe/modules/all_linux_arm64.go b/cmd/system-probe/modules/all_linux_arm64.go
-index e5a81541e5..663d2c804f 100644
+index e5a81541e5..4c3bc6ba3c 100644
 --- a/cmd/system-probe/modules/all_linux_arm64.go
 +++ b/cmd/system-probe/modules/all_linux_arm64.go
 @@ -3,7 +3,7 @@
@@ -20,12 +28,12 @@ index e5a81541e5..663d2c804f 100644
  // Copyright 2024-present Datadog, Inc.
  
 -//go:build linux && arm64
-+//go:build linux && arm64 && !nonglibc
++//go:build linux && arm64 && !glibc
  
  // Package modules is all the module definitions for system-probe
  package modules
 diff --git a/cmd/system-probe/modules/gpu.go b/cmd/system-probe/modules/gpu.go
-index 7ec273e7c2..d009389b1c 100644
+index c7dbac874d..4ef84fb1cf 100644
 --- a/cmd/system-probe/modules/gpu.go
 +++ b/cmd/system-probe/modules/gpu.go
 @@ -3,7 +3,7 @@
@@ -38,7 +46,7 @@ index 7ec273e7c2..d009389b1c 100644
  package modules
  
 diff --git a/pkg/collector/corechecks/gpu/gpu.go b/pkg/collector/corechecks/gpu/gpu.go
-index 1083db30ad..092a3b3b1f 100644
+index dbaa9bbc3d..6fd31fcdd5 100644
 --- a/pkg/collector/corechecks/gpu/gpu.go
 +++ b/pkg/collector/corechecks/gpu/gpu.go
 @@ -3,7 +3,7 @@
@@ -46,12 +54,12 @@ index 1083db30ad..092a3b3b1f 100644
  // Copyright 2024-present Datadog, Inc.
  
 -//go:build linux
-+//go:build linux && !nonglibc
++//go:build linux && glibc
  
  package gpu
  
 diff --git a/pkg/collector/corechecks/gpu/gpu_stub.go b/pkg/collector/corechecks/gpu/gpu_stub.go
-index 5aefc60217..c507f2a843 100644
+index 9605813661..51706336f2 100644
 --- a/pkg/collector/corechecks/gpu/gpu_stub.go
 +++ b/pkg/collector/corechecks/gpu/gpu_stub.go
 @@ -3,7 +3,7 @@
@@ -59,71 +67,156 @@ index 5aefc60217..c507f2a843 100644
  // Copyright 2024-present Datadog, Inc.
  
 -//go:build !linux
-+//go:build !linux || nonglibc
++//go:build !linux || !glibc
  
  package gpu
  
+diff --git a/releasenotes/notes/add-option-to-disable-gpu-module-3301f07d73244d06.yaml b/releasenotes/notes/add-option-to-disable-gpu-module-3301f07d73244d06.yaml
+new file mode 100644
+index 0000000000..e3f1e155e6
+--- /dev/null
++++ b/releasenotes/notes/add-option-to-disable-gpu-module-3301f07d73244d06.yaml
+@@ -0,0 +1,7 @@
++---
++enhancements:
++  - |
++    Add a build option (`--glibc`) to build the Agent on `glibc` environment.
++    On the other libc environments like `musl`, the Agent should be built without the option.
++    The option enables system-probe gpu module and corechecks gpu collector using
++    `github.com/NVIDIA/go-nvml` which depends on a glibc-extended definition.
 diff --git a/tasks/agent.py b/tasks/agent.py
-index b0220fcb60..bec7654b48 100644
+index 66da958ed9..c20b48ccf8 100644
 --- a/tasks/agent.py
 +++ b/tasks/agent.py
-@@ -140,6 +140,7 @@ def build(
+@@ -146,6 +146,7 @@ def build(
      bundle_ebpf=False,
      agent_bin=None,
      run_on=None,  # noqa: U100, F841. Used by the run_on_devcontainer decorator
-+    non_glibc=False,
++    no_glibc=False,
  ):
      """
      Build the agent. If the bits to include in the build are not specified,
-@@ -213,6 +214,9 @@ def build(
+@@ -219,6 +220,9 @@ def build(
              all_tags |= set(build_tags)
          build_tags = list(all_tags)
  
-+    if non_glibc:
-+        build_tags.append("nonglibc")
++    if no_glibc:
++        build_tags = list(set(build_tags).difference({"glibc"}))
 +
      cmd = "go build -mod={go_mod} {race_opt} {build_type} -tags \"{go_build_tags}\" "
  
      if not agent_bin:
+diff --git a/tasks/build_tags.py b/tasks/build_tags.py
+index cfcbb3c340..1d88165629 100644
+--- a/tasks/build_tags.py
++++ b/tasks/build_tags.py
+@@ -31,6 +31,7 @@ ALL_TAGS = {
+     "ec2",
+     "etcd",
+     "fargateprocess",
++    "glibc",  # Build the modules depending on the glibc extension.
+     "jmx",
+     "jetson",
+     "kubeapiserver",
+@@ -69,6 +70,7 @@ AGENT_TAGS = {
+     "docker",
+     "ec2",
+     "etcd",
++    "glibc",
+     "jetson",
+     "jmx",
+     "kubeapiserver",
+@@ -109,19 +111,19 @@ AGENT_HEROKU_TAGS = AGENT_TAGS.difference(
+ FIPS_AGENT_TAGS = AGENT_TAGS.union({"goexperiment.systemcrypto"})
+ 
+ # CLUSTER_AGENT_TAGS lists the tags needed when building the cluster-agent
+-CLUSTER_AGENT_TAGS = {"clusterchecks", "datadog.no_waf", "kubeapiserver", "orchestrator", "zlib", "zstd", "ec2"}
++CLUSTER_AGENT_TAGS = {"clusterchecks", "datadog.no_waf", "glibc", "kubeapiserver", "orchestrator", "zlib", "zstd", "ec2"}
+ 
+ # CLUSTER_AGENT_CLOUDFOUNDRY_TAGS lists the tags needed when building the cloudfoundry cluster-agent
+-CLUSTER_AGENT_CLOUDFOUNDRY_TAGS = {"clusterchecks"}
++CLUSTER_AGENT_CLOUDFOUNDRY_TAGS = {"clusterchecks", "glibc"}
+ 
+ # DOGSTATSD_TAGS lists the tags needed when building dogstatsd
+-DOGSTATSD_TAGS = {"containerd", "no_dynamic_plugins", "docker", "kubelet", "podman", "zlib", "zstd"}
++DOGSTATSD_TAGS = {"containerd", "no_dynamic_plugins", "docker", "glibc", "kubelet", "podman", "zlib", "zstd"}
+ 
+ # IOT_AGENT_TAGS lists the tags needed when building the IoT agent
+-IOT_AGENT_TAGS = {"jetson", "otlp", "systemd", "zlib", "zstd"}
++IOT_AGENT_TAGS = {"glibc", "jetson", "otlp", "systemd", "zlib", "zstd"}
+ 
+ # INSTALLER_TAGS lists the tags needed when building the installer
+-INSTALLER_TAGS = {"docker", "ec2", "kubelet"}
++INSTALLER_TAGS = {"docker", "ec2", "glibc", "kubelet"}
+ 
+ # PROCESS_AGENT_TAGS lists the tags necessary to build the process-agent
+ PROCESS_AGENT_TAGS = AGENT_TAGS.union({"fargateprocess"}).difference({"otlp", "python", "trivy"})
+@@ -150,6 +152,7 @@ SECURITY_AGENT_TAGS = {
+     "datadog.no_waf",
+     "docker",
+     "containerd",
++    "glibc",
+     "no_dynamic_plugins",
+     "kubeapiserver",
+     "kubelet",
+@@ -160,13 +163,14 @@ SECURITY_AGENT_TAGS = {
+ }
+ 
+ # SERVERLESS_TAGS lists the tags necessary to build serverless
+-SERVERLESS_TAGS = {"serverless", "otlp"}
++SERVERLESS_TAGS = {"glibc", "serverless", "otlp"}
+ 
+ # SYSTEM_PROBE_TAGS lists the tags necessary to build system-probe
+ SYSTEM_PROBE_TAGS = {
+     "datadog.no_waf",
+     "no_dynamic_plugins",
+     "ec2",
++    "glibc",
+     "linux_bpf",
+     "netcgo",
+     "npm",
+@@ -182,6 +186,7 @@ TRACE_AGENT_TAGS = {
+     "containerd",
+     "no_dynamic_plugins",
+     "datadog.no_waf",
++    "glibc"
+     "kubeapiserver",
+     "kubelet",
+     "otlp",
 diff --git a/tasks/system_probe.py b/tasks/system_probe.py
-index 5ddffee149..6da208b6d2 100644
+index 53a25237b7..cdfdf9a8a8 100644
 --- a/tasks/system_probe.py
 +++ b/tasks/system_probe.py
-@@ -684,10 +684,12 @@ def build(
-     with_unit_test=False,
+@@ -689,6 +689,7 @@ def build(
      ebpf_compiler='clang',
      static=False,
-+    non_glibc=False,
+     fips_mode=False,
++    no_glibc=False,
  ):
      """
      Build the system-probe
-     """
-+    raise NameError('test')
-     if not is_macos:
-         build_object_files(
-             ctx,
-@@ -710,6 +712,7 @@ def build(
-         strip_binary=strip_binary,
+@@ -716,6 +717,7 @@ def build(
          arch=arch,
          static=static,
-+        non_glibc=non_glibc,
+         fips_mode=fips_mode,
++        no_glibc=no_glibc,
      )
  
  
-@@ -737,6 +740,7 @@ def build_sysprobe_binary(
+@@ -743,6 +745,7 @@ def build_sysprobe_binary(
      strip_binary=False,
      fips_mode=False,
      static=False,
-+    non_glibc=False,
++    no_glibc=False,
  ) -> None:
      arch_obj = Arch.from_str(arch)
  
-@@ -759,6 +763,9 @@ def build_sysprobe_binary(
+@@ -765,6 +768,9 @@ def build_sysprobe_binary(
          build_tags.extend(["osusergo", "netgo"])
          build_tags = list(set(build_tags).difference({"netcgo"}))
  
-+    if non_glibc:
-+        build_tags.append("nonglibc")
++    if no_glibc:
++        build_tags = list(set(build_tags).difference({"glibc"}))
 +
      if not is_windows and "pcap" in build_tags:
          build_libpcap(ctx)
