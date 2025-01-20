@@ -1,93 +1,24 @@
-diff --git a/cmd/system-probe/modules/all_glibc_linux.go b/cmd/system-probe/modules/all_glibc_linux.go
-new file mode 100644
-index 0000000000..c6f419f58d
---- /dev/null
+diff --git a/cmd/system-probe/modules/all_linux_arm64.go b/cmd/system-probe/modules/all_glibc_linux.go
+similarity index 93%
+rename from cmd/system-probe/modules/all_linux_arm64.go
+rename to cmd/system-probe/modules/all_glibc_linux.go
+index e5a81541e5..9a4545e769 100644
+--- a/cmd/system-probe/modules/all_linux_arm64.go
 +++ b/cmd/system-probe/modules/all_glibc_linux.go
-@@ -0,0 +1,38 @@
-+// Unless explicitly stated otherwise all files in this repository are licensed
-+// under the Apache License Version 2.0.
-+// This product includes software developed at Datadog (https://www.datadoghq.com/).
+@@ -1,9 +1,9 @@
+ // Unless explicitly stated otherwise all files in this repository are licensed
+ // under the Apache License Version 2.0.
+ // This product includes software developed at Datadog (https://www.datadoghq.com/).
+-// Copyright 2024-present Datadog, Inc.
 +// Copyright 2016-present Datadog, Inc.
-+
-+//go:build linux && !arm64 && glibc
-+
-+// Package modules is all the module definitions for system-probe
-+package modules
-+
-+import (
-+	"time"
-+
-+	"github.com/DataDog/datadog-agent/cmd/system-probe/api/module"
-+)
-+
-+// All System Probe modules should register their factories here
-+var All = []module.Factory{
-+	EBPFProbe,
-+	NetworkTracer,
-+	TCPQueueLength,
-+	OOMKillProbe,
-+	// there is a dependency from EventMonitor -> NetworkTracer
-+	// so EventMonitor has to follow NetworkTracer
-+	EventMonitor,
-+	Process,
-+	DynamicInstrumentation,
-+	LanguageDetectionModule,
-+	ComplianceModule,
-+	Pinger,
-+	Traceroute,
-+	DiscoveryModule,
-+	GPUMonitoring, // GPU monitoring needs to be initialized afer EventMonitor, so that we have the event consumer ready
-+}
-+
-+func inactivityEventLog(_ time.Duration) {
-+
-+}
-diff --git a/cmd/system-probe/modules/all_glibc_linux_arm64.go b/cmd/system-probe/modules/all_glibc_linux_arm64.go
-new file mode 100644
-index 0000000000..033968300d
---- /dev/null
-+++ b/cmd/system-probe/modules/all_glibc_linux_arm64.go
-@@ -0,0 +1,38 @@
-+// Unless explicitly stated otherwise all files in this repository are licensed
-+// under the Apache License Version 2.0.
-+// This product includes software developed at Datadog (https://www.datadoghq.com/).
-+// Copyright 2024-present Datadog, Inc.
-+
-+//go:build linux && arm64 && glibc
-+
-+// Package modules is all the module definitions for system-probe
-+package modules
-+
-+import (
-+	"time"
-+
-+	"github.com/DataDog/datadog-agent/cmd/system-probe/api/module"
-+)
-+
-+// All System Probe modules should register their factories here
-+var All = []module.Factory{
-+	EBPFProbe,
-+	NetworkTracer,
-+	TCPQueueLength,
-+	OOMKillProbe,
-+	// there is a dependency from EventMonitor -> NetworkTracer
-+	// so EventMonitor has to follow NetworkTracer
-+	EventMonitor,
-+	Process,
-+	DynamicInstrumentation,
-+	LanguageDetectionModule,
-+	ComplianceModule,
-+	Pinger,
-+	Traceroute,
-+	DiscoveryModule,
-+	GPUMonitoring, // GPU monitoring needs to be initialized afer EventMonitor, so that we have the event consumer ready
-+}
-+
-+func inactivityEventLog(_ time.Duration) {
-+
-+}
+ 
+-//go:build linux && arm64
++//go:build linux && glibc
+ 
+ // Package modules is all the module definitions for system-probe
+ package modules
 diff --git a/cmd/system-probe/modules/all_linux.go b/cmd/system-probe/modules/all_linux.go
-index 79b6f3d74a..0da0a6818a 100644
+index 79b6f3d74a..24fb877689 100644
 --- a/cmd/system-probe/modules/all_linux.go
 +++ b/cmd/system-probe/modules/all_linux.go
 @@ -3,7 +3,7 @@
@@ -95,7 +26,7 @@ index 79b6f3d74a..0da0a6818a 100644
  // Copyright 2016-present Datadog, Inc.
  
 -//go:build linux && !arm64
-+//go:build linux && !arm64 && !glibc
++//go:build linux && !glibc
  
  // Package modules is all the module definitions for system-probe
  package modules
@@ -107,21 +38,8 @@ index 79b6f3d74a..0da0a6818a 100644
  }
  
  func inactivityEventLog(_ time.Duration) {
-diff --git a/cmd/system-probe/modules/all_linux_arm64.go b/cmd/system-probe/modules/all_linux_arm64.go
-index e5a81541e5..4c3bc6ba3c 100644
---- a/cmd/system-probe/modules/all_linux_arm64.go
-+++ b/cmd/system-probe/modules/all_linux_arm64.go
-@@ -3,7 +3,7 @@
- // This product includes software developed at Datadog (https://www.datadoghq.com/).
- // Copyright 2024-present Datadog, Inc.
- 
--//go:build linux && arm64
-+//go:build linux && arm64 && !glibc
- 
- // Package modules is all the module definitions for system-probe
- package modules
 diff --git a/cmd/system-probe/modules/gpu.go b/cmd/system-probe/modules/gpu.go
-index 7ec273e7c2..d009389b1c 100644
+index 7ec273e7c2..47b4f3991f 100644
 --- a/cmd/system-probe/modules/gpu.go
 +++ b/cmd/system-probe/modules/gpu.go
 @@ -3,7 +3,7 @@
@@ -129,7 +47,7 @@ index 7ec273e7c2..d009389b1c 100644
  // Copyright 2024-present Datadog, Inc.
  
 -//go:build linux
-+//go:build linux && !nonglibc
++//go:build linux && glibc
  
  package modules
  
@@ -161,26 +79,26 @@ index 5aefc60217..577a4ed494 100644
  
 diff --git a/releasenotes/notes/add-option-to-disable-gpu-module-3301f07d73244d06.yaml b/releasenotes/notes/add-option-to-disable-gpu-module-3301f07d73244d06.yaml
 new file mode 100644
-index 0000000000..e3f1e155e6
+index 0000000000..2a873b9f03
 --- /dev/null
 +++ b/releasenotes/notes/add-option-to-disable-gpu-module-3301f07d73244d06.yaml
 @@ -0,0 +1,7 @@
 +---
 +enhancements:
 +  - |
-+    Add a build option (`--glibc`) to build the Agent on `glibc` environment.
-+    On the other libc environments like `musl`, the Agent should be built without the option.
++    Add a build option (`--glibc`, enabled by default) to build the Agent on `glibc` environment.
++    On the other libc environments like `musl`, the Agent should be built with `--no-glibc` option.
 +    The option enables system-probe gpu module and corechecks gpu collector using
 +    `github.com/NVIDIA/go-nvml` which depends on a glibc-extended definition.
 diff --git a/tasks/agent.py b/tasks/agent.py
-index b0220fcb60..523df6a7b8 100644
+index b0220fcb60..ae6b80def5 100644
 --- a/tasks/agent.py
 +++ b/tasks/agent.py
 @@ -140,6 +140,7 @@ def build(
      bundle_ebpf=False,
      agent_bin=None,
      run_on=None,  # noqa: U100, F841. Used by the run_on_devcontainer decorator
-+    no_glibc=False,
++    glibc=True,
  ):
      """
      Build the agent. If the bits to include in the build are not specified,
@@ -188,7 +106,7 @@ index b0220fcb60..523df6a7b8 100644
              all_tags |= set(build_tags)
          build_tags = list(all_tags)
  
-+    if no_glibc:
++    if not glibc:
 +        build_tags = list(set(build_tags).difference({"glibc"}))
 +
      cmd = "go build -mod={go_mod} {race_opt} {build_type} -tags \"{go_build_tags}\" "
@@ -266,14 +184,14 @@ index 81b0564285..190d83ff62 100644
  # TRACE_AGENT_HEROKU_TAGS lists the tags necessary to build the trace-agent for Heroku
  TRACE_AGENT_HEROKU_TAGS = TRACE_AGENT_TAGS.difference(
 diff --git a/tasks/system_probe.py b/tasks/system_probe.py
-index 5ddffee149..62ae982479 100644
+index 5ddffee149..bbc237bcf4 100644
 --- a/tasks/system_probe.py
 +++ b/tasks/system_probe.py
 @@ -684,6 +684,7 @@ def build(
      with_unit_test=False,
      ebpf_compiler='clang',
      static=False,
-+    no_glibc=False,
++    glibc=True,
  ):
      """
      Build the system-probe
@@ -281,7 +199,7 @@ index 5ddffee149..62ae982479 100644
          strip_binary=strip_binary,
          arch=arch,
          static=static,
-+        no_glibc=no_glibc,
++        glibc=glibc,
      )
  
  
@@ -289,7 +207,7 @@ index 5ddffee149..62ae982479 100644
      strip_binary=False,
      fips_mode=False,
      static=False,
-+    no_glibc=False,
++    glibc=True,
  ) -> None:
      arch_obj = Arch.from_str(arch)
  
@@ -297,7 +215,7 @@ index 5ddffee149..62ae982479 100644
          build_tags.extend(["osusergo", "netgo"])
          build_tags = list(set(build_tags).difference({"netcgo"}))
  
-+    if no_glibc:
++    if not glibc:
 +        build_tags = list(set(build_tags).difference({"glibc"}))
 +
      if not is_windows and "pcap" in build_tags:
