@@ -291,6 +291,9 @@ RUN if [ ! -f /usr/bin/process-agent   ]; then rm -rf /etc/services.d/process;  
   && if [ ! -f /usr/bin/trace-agent    ]; then rm -rf /etc/services.d/trace;    fi \
   && if [ ! -f /usr/bin/system-probe   ]; then rm -rf /etc/services.d/sysprobe; fi
 
+# Disable otel-agent
+RUN rm -rf /etc/services.d/otel
+
 ENV DOCKER_DD_AGENT=true \
     DD_PYTHON_VERSION=3 \
     PATH=/opt/datadog-agent/bin/agent/:/opt/datadog-agent/embedded/bin:$PATH \
