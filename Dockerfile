@@ -310,7 +310,7 @@ ARG INTEGRATIONS_CORE="\
   system_core \
   system_swap"
 
-ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.60.1
+ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.67.0
 RUN apk add --virtual .build-deps \
     g++ \
     gcc \
