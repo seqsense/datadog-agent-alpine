@@ -141,7 +141,7 @@ COPY --from=systemd-builder /work/systemd/src/systemd/ /usr/include/systemd/
 
 RUN invoke agent.build \
     --exclude-rtloader \
-    --build-exclude=jmx,kubeapiserver,gce,ec2,orchestrator
+    --build-exclude=jmx,kubeapiserver,ec2,orchestrator
 
 RUN mkdir -p /agent-bin \
   && mkdir -p /agent-embedded \
