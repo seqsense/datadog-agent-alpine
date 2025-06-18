@@ -31,6 +31,17 @@
         "^Dockerfile$"
       ],
       "matchStrings": [
+        "ARG DATADOG_DDAVERSION=(?<currentValue>.*)"
+      ],
+      "datasourceTemplate": "github-tags",
+      "depNameTemplate": "DataDog/datadog-agent-dev",
+      "versioningTemplate": "semver"
+    },
+    {
+      "fileMatch": [
+        "^Dockerfile$"
+      ],
+      "matchStrings": [
         "ARG S6_OVERLAY_VERSION=(?<currentValue>.*)"
       ],
       "datasourceTemplate": "github-releases",
