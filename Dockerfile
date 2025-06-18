@@ -98,6 +98,7 @@ WORKDIR /build/datadog-agent
 ARG DATADOG_DDA_VERSION=v0.17.0
 RUN python3 -m pip install "dda==${DATADOG_DDA_VERSION}" --break-system-packages \
   && dda -v self dep sync -f legacy-tasks
+ENV GOWORK=off
 
 ARG CI_ONLY_DEPS=" \
   codeowners \
