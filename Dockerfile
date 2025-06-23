@@ -86,7 +86,7 @@ RUN apk add --no-cache \
     py3-yaml \
     python3-dev
 
-ARG DATADOG_VERSION=7.66.1
+ARG DATADOG_VERSION=7.67.0
 # datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
 RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent \
   && cd /build/datadog-agent \
@@ -304,7 +304,7 @@ ARG INTEGRATIONS_CORE="\
   system_core \
   system_swap"
 
-ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.66.1
+ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.67.0
 RUN apk add --virtual .build-deps \
     g++ \
     gcc \
