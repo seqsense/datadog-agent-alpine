@@ -140,6 +140,7 @@ RUN strip -s /build/datadog-agent/dev/lib/*.so
 COPY --from=systemd-builder /work/systemd/src/systemd/ /usr/include/systemd/
 
 RUN invoke agent.build \
+    --no-glibc \
     --exclude-rtloader \
     --build-exclude=jmx,kubeapiserver,ec2,orchestrator
 
