@@ -1,11 +1,12 @@
 {
   "extends": [
-    "config:base"
+    "config:recommended"
   ],
-  "regexManagers": [
+  "customManagers": [
     {
-      "fileMatch": [
-        "^Dockerfile$"
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Dockerfile$/"
       ],
       "matchStrings": [
         "ARG DATADOG_VERSION=(?<currentValue>.*)"
@@ -15,8 +16,9 @@
       "versioningTemplate": "semver"
     },
     {
-      "fileMatch": [
-        "^Dockerfile$"
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Dockerfile$/"
       ],
       "matchStrings": [
         "ARG DATADOG_INTEGRATIONS_CORE_VERSION=(?<currentValue>.*)"
@@ -24,11 +26,12 @@
       "datasourceTemplate": "git-tags",
       "depNameTemplate": "DataDog/integrations-core",
       "versioningTemplate": "semver",
-      "lookupNameTemplate": "https://github.com/DataDog/integrations-core.git"
+      "packageNameTemplate": "https://github.com/DataDog/integrations-core.git"
     },
     {
-      "fileMatch": [
-        "^Dockerfile$"
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Dockerfile$/"
       ],
       "matchStrings": [
         "ARG DATADOG_DDAVERSION=(?<currentValue>.*)"
@@ -38,8 +41,9 @@
       "versioningTemplate": "semver"
     },
     {
-      "fileMatch": [
-        "^Dockerfile$"
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Dockerfile$/"
       ],
       "matchStrings": [
         "ARG S6_OVERLAY_VERSION=(?<currentValue>.*)"
@@ -47,11 +51,12 @@
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "just-containers/s6-overlay",
       "versioningTemplate": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(\\.(?<build>\\d+))?$",
-      "lookupNameTemplate": "just-containers/s6-overlay"
+      "packageNameTemplate": "just-containers/s6-overlay"
     },
     {
-      "fileMatch": [
-        "^Dockerfile$"
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Dockerfile$/"
       ],
       "matchStrings": [
         "ARG ALPINE_VERSION=(?<currentValue>[0-9.]+)"
@@ -61,8 +66,9 @@
       "versioningTemplate": "docker"
     },
     {
-      "fileMatch": [
-        "^Dockerfile$"
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Dockerfile$/"
       ],
       "matchStrings": [
         "ARG GOLANG_VERSION=(?<currentValue>[0-9.]+)"
@@ -76,8 +82,8 @@
     {
       "groupName": "datadog packages",
       "groupSlug": "datadog",
-      "packagePatterns": [
-        "^DataDog/*"
+      "matchPackageNames": [
+        "/^DataDog/*/"
       ]
     }
   ]
