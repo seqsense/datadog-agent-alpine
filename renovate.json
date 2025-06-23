@@ -34,7 +34,7 @@
         "/^Dockerfile$/"
       ],
       "matchStrings": [
-        "ARG DATADOG_DDAVERSION=(?<currentValue>.*)"
+        "ARG DATADOG_DDA_VERSION=(?<currentValue>.*)"
       ],
       "datasourceTemplate": "github-tags",
       "depNameTemplate": "DataDog/datadog-agent-dev",
