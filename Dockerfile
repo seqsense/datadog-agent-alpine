@@ -86,7 +86,7 @@ RUN apk add --no-cache \
     py3-yaml \
     python3-dev
 
-ARG DATADOG_VERSION=7.60.1
+ARG DATADOG_VERSION=7.67.0
 # datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
 RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent \
   && cd /build/datadog-agent \
@@ -95,7 +95,10 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
 
 WORKDIR /build/datadog-agent
 
-ARG DATADOG_AGENT_BUILDIMAGES_VERSION=bf31b4201bf857cb83549e71913c19cf077861aa
+ARG DATADOG_DDA_VERSION=v0.17.0
+RUN python3 -m pip install "dda==${DATADOG_DDA_VERSION}" --break-system-packages \
+  && dda -v self dep sync -f legacy-tasks
+ENV GOWORK=off
 
 ARG CI_ONLY_DEPS=" \
   codeowners \
@@ -119,16 +122,6 @@ ARG SYSTEM_PYTHON_DEPS=" \
   wheel \
 "
 
-RUN mkdir -p buildimages \
-  && git -C buildimages init \
-  && git -C buildimages remote add origin https://github.com/DataDog/datadog-agent-buildimages.git \
-  && git -C buildimages fetch --depth 1 origin ${DATADOG_AGENT_BUILDIMAGES_VERSION} \
-  && git -C buildimages checkout FETCH_HEAD \
-  && for d in ${CI_ONLY_DEPS} ${SYSTEM_PYTHON_DEPS}; do \
-      sed "/^$d\(=\|$\)/di" -i requirements.txt buildimages/requirements.txt buildimages/requirements/constraints.txt; \
-    done \
-  && sed 's|-r .*/DataDog/datadog-agent-buildimages/main/requirements.txt|-r buildimages/requirements.txt|' -i requirements.txt \
-  && python3 -m pip install -r requirements.txt --break-system-packages
 RUN invoke deps
 
 ENV CGO_CFLAGS="-Os -I/build/datadog-agent/dev/include" \
@@ -147,8 +140,9 @@ RUN strip -s /build/datadog-agent/dev/lib/*.so
 COPY --from=systemd-builder /work/systemd/src/systemd/ /usr/include/systemd/
 
 RUN invoke agent.build \
+    --no-glibc \
     --exclude-rtloader \
-    --build-exclude=jmx,kubeapiserver,gce,ec2,orchestrator
+    --build-exclude=jmx,kubeapiserver,ec2,orchestrator
 
 RUN mkdir -p /agent-bin \
   && mkdir -p /agent-embedded \
@@ -310,7 +304,7 @@ ARG INTEGRATIONS_CORE="\
   system_core \
   system_swap"
 
-ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.60.1
+ARG DATADOG_INTEGRATIONS_CORE_VERSION=7.67.0
 RUN apk add --virtual .build-deps \
     g++ \
     gcc \
