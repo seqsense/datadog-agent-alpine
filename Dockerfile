@@ -177,9 +177,9 @@ RUN apk add \
     libffi \
     libgcc \
     libseccomp \
+    libssl3 \
     libstdc++ \
     lz4-libs \
-    openssl-dev \
     py3-cryptography \
     py3-jellyfish \
     py3-python-gssapi \
