@@ -143,6 +143,7 @@ RUN invoke agent.build \
     --no-glibc \
     --exclude-rtloader \
     --build-exclude=jmx,kubeapiserver,ec2,orchestrator
+RUN strip -s /build/datadog-agent/bin/agent/agent
 
 RUN mkdir -p /agent-bin \
   && mkdir -p /agent-embedded \
@@ -152,6 +153,7 @@ ARG ENABLE_PROCESS_AGENT=0
 RUN set -eu; \
   if [ ${ENABLE_PROCESS_AGENT} -eq 1 ]; then \
     invoke process-agent.build; \
+    strip -s bin/process-agent/process-agent; \
     mv bin/process-agent/process-agent /agent-bin/; \
   fi
 
@@ -159,6 +161,7 @@ ARG ENABLE_SECURITY_AGENT=0
 RUN set -eu; \
   if [ ${ENABLE_SECURITY_AGENT} -eq 1 ]; then \
     invoke security-agent.build; \
+    strip -s bin/security-agent/security-agent; \
     mv bin/security-agent/security-agent /agent-bin/; \
   fi
 
@@ -166,6 +169,7 @@ ARG ENABLE_TRACE_AGENT=0
 RUN set -eu; \
   if [ ${ENABLE_TRACE_AGENT} -eq 1 ]; then \
     invoke trace-agent.build; \
+    strip -s bin/trace-agent/trace-agent; \
     mv bin/trace-agent/trace-agent /agent-bin/; \
   fi
 
