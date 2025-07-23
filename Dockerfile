@@ -65,7 +65,6 @@ RUN apk add --no-cache \
     g++ \
     gcc \
     git \
-    krb5-dev \
     libffi-dev \
     make \
     musl-dev \
@@ -310,6 +309,7 @@ RUN apk add --virtual .build-deps \
     g++ \
     gcc \
     git \
+    krb5-dev \
     linux-headers \
     musl-dev \
     python3-dev \
