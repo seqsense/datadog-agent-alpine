@@ -349,7 +349,8 @@ RUN apk add --virtual .build-deps \
   && find /usr -name "__pycache__" -delete \
   && rm -rf \
     /usr/lib/python*/site-packages/twisted/test \
-    /usr/lib/python*/site-packages/docutils
+    /usr/lib/python*/site-packages/docutils \
+  && rm -rf /root/.cache
 
 # note: removed packages from datadog_checks_base/pyproject.toml
 #   botocore: seems not used at all https://github.com/DataDog/integrations-core/search?q=botocore
