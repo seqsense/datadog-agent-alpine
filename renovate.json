@@ -85,6 +85,13 @@
       "matchPackageNames": [
         "/^DataDog/*/"
       ]
+    },
+    {
+      "matchPackageNames": [
+        "/^alpine$/",
+        "/^golang$/"
+      ],
+      "separateMultipleMinor": true
     }
   ]
 }
