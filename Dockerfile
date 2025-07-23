@@ -65,6 +65,7 @@ RUN apk add --no-cache \
     g++ \
     gcc \
     git \
+    krb5-dev \
     libffi-dev \
     make \
     musl-dev \
