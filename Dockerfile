@@ -170,7 +170,6 @@ RUN rm -rf \
 FROM alpine:${ALPINE_VERSION} AS datadog-agent
 
 RUN apk add \
-    aws-cli \
     bash \
     ca-certificates \
     coreutils \
@@ -180,22 +179,7 @@ RUN apk add \
     libssl3 \
     libstdc++ \
     lz4-libs \
-    py3-cryptography \
-    py3-jellyfish \
-    py3-python-gssapi \
-    py3-packaging \
     py3-pip \
-    py3-prometheus-client \
-    py3-protobuf \
-    py3-psutil \
-    py3-pysocks \
-    py3-requests \
-    py3-requests-toolbelt \
-    py3-simplejson \
-    py3-six \
-    py3-wheel \
-    py3-wrapt \
-    py3-yaml \
     python3 \
     xz-libs \
     zstd-libs \
@@ -282,19 +266,6 @@ RUN apk add --virtual .build-deps \
   && git checkout refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
   && for d in \
       botocore \
-      cryptography \
-      gssapi \
-      jellyfish \
-      prometheus-client \
-      protobuf \
-      pysocks \
-      pyyaml \
-      requests \
-      requests_toolbelt \
-      simplejson \
-      six \
-      wheel \
-      wrapt \
     ; do \
       sed "/\"$d=/di" -i datadog_checks_base/pyproject.toml; \
     done \
@@ -312,7 +283,6 @@ RUN apk add --virtual .build-deps \
 
 # note: removed packages from datadog_checks_base/pyproject.toml
 #   botocore: seems not used at all https://github.com/DataDog/integrations-core/search?q=botocore
-#   other packages: installed as Alpine package
 
 # note: removed directories
 #   twisted/test: unit test of twisted package
