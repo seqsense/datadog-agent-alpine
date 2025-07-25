@@ -287,7 +287,7 @@ RUN apk add --virtual .build-deps \
     /usr/lib/python*/site-packages/docutils \
   && rm -rf /root/.cache
 
-# note: install [deps] as well as the packages in integrations-core defines
+# note: install [deps] as well since the packages in integrations-core defines
 #       mandatory dependencies as optional-dependencies named 'deps'
 
 # note: removed packages from datadog_checks_base/pyproject.toml
