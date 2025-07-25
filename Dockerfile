@@ -57,7 +57,6 @@ RUN strip -s /usr/local/lib/libsystemd.so.${SYSTEMD_LIB_VERSION}
 FROM golang:${GOLANG_VERSION}-alpine${ALPINE_VERSION} AS agent-builder
 
 RUN apk add --no-cache \
-    aws-cli \
     bash \
     ca-certificates \
     cmake \
@@ -69,21 +68,7 @@ RUN apk add --no-cache \
     make \
     musl-dev \
     patch \
-    py3-boto3 \
-    py3-botocore \
-    py3-docker-py \
-    py3-dulwich \
-    py3-isort \
-    py3-packaging \
     py3-pip \
-    py3-prompt_toolkit \
-    py3-requests \
-    py3-ruamel.yaml \
-    py3-semver \
-    py3-toml \
-    py3-urllib3=~1 \
-    py3-wheel \
-    py3-yaml \
     python3-dev
 
 ARG DATADOG_VERSION=7.68.2
@@ -99,28 +84,6 @@ ARG DATADOG_DDA_VERSION=v0.22.0
 RUN python3 -m pip install "dda==${DATADOG_DDA_VERSION}" --break-system-packages \
   && dda -v self dep sync -f legacy-tasks
 ENV GOWORK=off
-
-ARG CI_ONLY_DEPS=" \
-  codeowners \
-  docker-squash \
-  reno \
-"
-ARG SYSTEM_PYTHON_DEPS=" \
-  awscli \
-  boto3 \
-  botocore \
-  docker \
-  dulwich \
-  isort \
-  packaging \
-  pyyaml \
-  requests \
-  ruamel.yaml \
-  semver \
-  toml \
-  urllib3 \
-  wheel \
-"
 
 RUN invoke deps
 
@@ -211,32 +174,16 @@ RUN rm -rf \
 FROM alpine:${ALPINE_VERSION} AS datadog-agent
 
 RUN apk add \
-    aws-cli \
     bash \
     ca-certificates \
     coreutils \
     libffi \
     libgcc \
     libseccomp \
+    libssl3 \
     libstdc++ \
     lz4-libs \
-    openssl-dev \
-    py3-cryptography \
-    py3-jellyfish \
-    py3-python-gssapi \
-    py3-packaging \
     py3-pip \
-    py3-prometheus-client \
-    py3-protobuf \
-    py3-psutil \
-    py3-pysocks \
-    py3-requests \
-    py3-requests-toolbelt \
-    py3-simplejson \
-    py3-six \
-    py3-wheel \
-    py3-wrapt \
-    py3-yaml \
     python3 \
     xz-libs \
     zstd-libs \
@@ -323,19 +270,6 @@ RUN apk add --virtual .build-deps \
   && git checkout refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
   && for d in \
       botocore \
-      cryptography \
-      gssapi \
-      jellyfish \
-      prometheus-client \
-      protobuf \
-      pysocks \
-      pyyaml \
-      requests \
-      requests_toolbelt \
-      simplejson \
-      six \
-      wheel \
-      wrapt \
     ; do \
       sed "/\"$d=/di" -i datadog_checks_base/pyproject.toml; \
     done \
@@ -354,7 +288,6 @@ RUN apk add --virtual .build-deps \
 
 # note: removed packages from datadog_checks_base/pyproject.toml
 #   botocore: seems not used at all https://github.com/DataDog/integrations-core/search?q=botocore
-#   other packages: installed as Alpine package
 
 # note: removed directories
 #   twisted/test: unit test of twisted package
