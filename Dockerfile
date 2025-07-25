@@ -276,7 +276,7 @@ RUN apk add --virtual .build-deps \
   && export LDFLAGS="-Wl,--strip-debug" \
   && python3 -m pip install \
     "./datadog_checks_base[deps, http]" \
-    $(echo ${INTEGRATIONS_CORE} | xargs -n1 echo | sed 's|^|./|') \
+    $(echo ${INTEGRATIONS_CORE} | xargs -n1 echo | sed 's|^.*$|./\0 ./\0[deps]|') \
   && apk del --force-broken-world .build-deps \
   && cd / && rm -rf /tmp/integrations-core \
   && rm -f /var/cache/apk/* \
@@ -286,6 +286,9 @@ RUN apk add --virtual .build-deps \
     /usr/lib/python*/site-packages/twisted/test \
     /usr/lib/python*/site-packages/docutils \
   && rm -rf /root/.cache
+
+# note: install [deps] as well as the packages in integrations-core defines
+#       mandatory dependencies as optional-dependencies named 'deps'
 
 # note: removed packages from datadog_checks_base/pyproject.toml
 #   botocore: seems not used at all https://github.com/DataDog/integrations-core/search?q=botocore
