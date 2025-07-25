@@ -169,6 +169,7 @@ RUN rm -rf \
   /etc/datadog-agent/conf.d/jmx.d \
   /etc/datadog-agent/conf.d/kubernetes_apiserver.d
 
+
 # ===========================
 FROM alpine:${ALPINE_VERSION} AS datadog-agent
 
