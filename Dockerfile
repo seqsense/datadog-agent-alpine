@@ -273,6 +273,7 @@ RUN apk add --virtual .build-deps \
     ; do \
       sed "/\"$d=/di" -i datadog_checks_base/pyproject.toml; \
     done \
+  && export LDFLAGS="-Wl,--strip-debug" \
   && python3 -m pip install \
     "./datadog_checks_base[deps, http]" \
     $(echo ${INTEGRATIONS_CORE} | xargs -n1 echo | sed 's|^|./|') \
