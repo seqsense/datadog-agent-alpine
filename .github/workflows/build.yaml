@@ -39,7 +39,7 @@ jobs:
             | xargs -n1 -I{} echo ENABLE_{} >> ${GITHUB_ENV}
 
       - name: Cache docker layers
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /tmp/layer-cache
           key: layer-cache-${{ matrix.enable }}-${{ hashFiles('*Dockerfile') }}
