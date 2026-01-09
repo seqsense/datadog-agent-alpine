@@ -71,7 +71,7 @@ RUN apk add --no-cache \
     py3-pip \
     python3-dev
 
-ARG DATADOG_VERSION=7.71.1
+ARG DATADOG_VERSION=7.74.1
 # datadog-agent has both branch and tag of the version. refs/tags/version must be checked-out.
 RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/datadog-agent \
   && cd /build/datadog-agent \
@@ -80,7 +80,7 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
 
 WORKDIR /build/datadog-agent
 
-ARG DATADOG_DDA_VERSION=v0.29.0
+ARG DATADOG_DDA_VERSION=v0.31.0
 RUN python3 -m pip install "dda==${DATADOG_DDA_VERSION}" --break-system-packages \
   && dda -v self dep sync -f legacy-tasks
 ENV GOWORK=off
@@ -302,7 +302,7 @@ EXPOSE 8125/udp 8126/tcp
 HEALTHCHECK --interval=30s --timeout=5s --retries=2 \
   CMD ["/probe.sh"]
 
-ARG DATADOG_VERSION=7.71.1
+ARG DATADOG_VERSION=7.74.1
 ENV DATADOG_INTEGRATIONS_CORE_VERSION=${DATADOG_INTEGRATIONS_CORE_VERSION} \
   DATADOG_VERSION=${DATADOG_VERSION}
 
