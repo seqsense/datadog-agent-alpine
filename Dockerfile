@@ -31,6 +31,7 @@ RUN apk add --no-cache \
 ARG SYSTEMD_VERSION=v254.16
 ARG SYSTEMD_LIB_VERSION=0.37.0
 ARG OPENEMBEDDED_CORE_SHA=8063bcb2d4fcfeded5edac3b0895151e8dc8bf0f
+ARG SYSTEMD_EXCLUDED_PATCHES="0030-meson-Pass-all-static-pie-args-to-linker.patch"
 
 ENV CFLAGS=-Os
 WORKDIR /work/systemd
@@ -39,11 +40,12 @@ RUN cd /work \
   && git clone --depth=1 -b ${SYSTEMD_VERSION} https://github.com/systemd/systemd-stable.git systemd \
   && git clone --depth=1 https://github.com/openembedded/openembedded-core.git \
   && (cd openembedded-core && git fetch --depth 1 origin ${OPENEMBEDDED_CORE_SHA} && git checkout ${OPENEMBEDDED_CORE_SHA}) \
+  && (cd openembedded-core/meta/recipes-core/systemd/systemd && rm ${SYSTEMD_EXCLUDED_PATCHES}) \
   && cp openembedded-core/meta/recipes-core/systemd/systemd/*.patch systemd/
 
 ENV CFLAGS=-D__UAPI_DEF_ETHHDR=0
 
-RUN ls -1 *.patch | xargs -n1 patch -p1 -i
+RUN ls -1 *.patch | xargs -t -n1 patch -p1 -i
 RUN ./configure \
     -Dgshadow=false \
     -Didn=false \
