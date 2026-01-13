@@ -37,8 +37,8 @@ WORKDIR /work/systemd
 
 RUN cd /work \
   && git clone --depth=1 -b ${SYSTEMD_VERSION} https://github.com/systemd/systemd-stable.git systemd \
-  && git clone --depth=10000 https://github.com/openembedded/openembedded-core.git \
-  && (cd openembedded-core && git checkout ${OPENEMBEDDED_CORE_SHA}) \
+  && git clone --depth=1 https://github.com/openembedded/openembedded-core.git \
+  && (cd openembedded-core && git fetch --depth 1 origin ${OPENEMBEDDED_CORE_SHA} && git checkout ${OPENEMBEDDED_CORE_SHA}) \
   && cp openembedded-core/meta/recipes-core/systemd/systemd/*.patch systemd/
 
 ENV CFLAGS=-D__UAPI_DEF_ETHHDR=0
