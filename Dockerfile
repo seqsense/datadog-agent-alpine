@@ -28,7 +28,7 @@ RUN apk add --no-cache \
     xz-dev \
     zstd-dev
 
-ARG SYSTEMD_VERSION=v254.4
+ARG SYSTEMD_VERSION=v254.16
 ARG SYSTEMD_LIB_VERSION=0.37.0
 ARG OPENEMBEDDED_CORE_SHA=8063bcb2d4fcfeded5edac3b0895151e8dc8bf0f
 
