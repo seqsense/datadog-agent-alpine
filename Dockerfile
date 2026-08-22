@@ -1,5 +1,5 @@
 ARG ALPINE_VERSION=3.23
-ARG GOLANG_VERSION=1.25
+ARG GOLANG_VERSION=1.27
 
 # ===========================
 FROM alpine:${ALPINE_VERSION} as systemd-builder
