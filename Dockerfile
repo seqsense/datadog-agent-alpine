@@ -82,7 +82,7 @@ RUN git clone --depth=1 https://github.com/DataDog/datadog-agent.git /build/data
 
 WORKDIR /build/datadog-agent
 
-ARG DATADOG_DDA_VERSION=v0.31.0
+ARG DATADOG_DDA_VERSION=v0.38.1
 RUN python3 -m pip install "dda==${DATADOG_DDA_VERSION}" --break-system-packages \
   && dda -v self dep sync -f legacy-tasks
 ENV GOWORK=off
