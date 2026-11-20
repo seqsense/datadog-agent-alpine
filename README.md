@@ -34,6 +34,7 @@ docker run --security-opt=seccomp=unconfined --security-opt=apparmor=unconfined 
 ## Docker images
 
 Pre-built images with some combination of the features are available on GitHub Container Registry.
+Images are available for `linux/amd64` and `linux/arm64`.
 
 ```shell
 # Minimal image
