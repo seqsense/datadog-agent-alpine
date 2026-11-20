@@ -202,18 +202,7 @@ jobs:
         run: |
           for tag in $(cat tags-*.txt); do
             image=ghcr.io/${{ github.repository_owner }}/${tag}
-            # Do not overwrite the tag with an arm64 only manifest list
-            if ! docker manifest inspect ${image}-amd64 > /dev/null; then
-              echo "${image}-amd64 is not found"
-              continue
-            fi
-            manifests=("${image}-amd64")
-            if docker manifest inspect ${image}-arm64 > /dev/null; then
-              manifests+=("${image}-arm64")
-            else
-              echo "${image}-arm64 is not found"
-            fi
-            docker manifest create --amend ${image} "${manifests[@]}"
+            docker manifest create --amend ${image} ${image}-amd64 ${image}-arm64
             docker manifest push --purge ${image}
           done
 
