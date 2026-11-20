@@ -14,10 +14,16 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.arch.runner }}
     timeout-minutes: 60
     strategy:
+      fail-fast: false
       matrix:
+        arch:
+          - platform: amd64
+            runner: ubuntu-latest
+          - platform: arm64
+            runner: ubuntu-24.04-arm
         enable:
           - PROCESS_AGENT=0 SECURITY_AGENT=0 TRACE_AGENT=0 BUILD_INTEGRATIONS_BUILDER=1
           - PROCESS_AGENT=1 SECURITY_AGENT=0 TRACE_AGENT=0
@@ -42,10 +48,10 @@ jobs:
         uses: actions/cache@v6
         with:
           path: /tmp/layer-cache
-          key: layer-cache-${{ matrix.enable }}-${{ hashFiles('*Dockerfile') }}
+          key: layer-cache-${{ matrix.arch.platform }}-${{ matrix.enable }}-${{ hashFiles('*Dockerfile') }}
           restore-keys: |
-            layer-cache-${{ matrix.enable }}-
-            layer-cache-
+            layer-cache-${{ matrix.arch.platform }}-${{ matrix.enable }}-
+            layer-cache-${{ matrix.arch.platform }}-
 
       - name: Get image tag
         id: tag
@@ -123,33 +129,82 @@ jobs:
         run: |
           docker tag \
             ${{ steps.tag.outputs.tag }} \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}
-          docker push \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}-${{ matrix.arch.platform }}
+          docker push --platform linux/${{ matrix.arch.platform }} \
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}-${{ matrix.arch.platform }}
           docker tag \
             ${{ steps.tag.outputs.tag }} \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag_with_alpine_version }}
-          docker push \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag_with_alpine_version }}
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag_with_alpine_version }}-${{ matrix.arch.platform }}
+          docker push --platform linux/${{ matrix.arch.platform }} \
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag_with_alpine_version }}-${{ matrix.arch.platform }}
           docker tag \
             ${{ steps.tag.outputs.tag }} \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}
-          docker push \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}
+            ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}-${{ matrix.arch.platform }}
+          docker push --platform linux/${{ matrix.arch.platform }} \
+            ghcr.io/${{ github.repository_owner }}/${{ steps.tag.outputs.tag }}-${{ matrix.arch.platform }}
 
       - name: Deploy integrations-builder
         if: github.event_name == 'push' && github.ref == 'refs/heads/master' && env.ENABLE_BUILD_INTEGRATIONS_BUILDER == 1
         run: |
           docker tag \
             ${{ steps.tag.outputs.tag }}-integrations-builder \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}-integrations-builder
-          docker push \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}-integrations-builder
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}-integrations-builder-${{ matrix.arch.platform }}
+          docker push --platform linux/${{ matrix.arch.platform }} \
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag }}-integrations-builder-${{ matrix.arch.platform }}
           docker tag \
             ${{ steps.tag.outputs.tag }}-integrations-builder \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag_with_alpine_version }}-integrations-builder
-          docker push \
-            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag_with_alpine_version }}-integrations-builder
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag_with_alpine_version }}-integrations-builder-${{ matrix.arch.platform }}
+          docker push --platform linux/${{ matrix.arch.platform }} \
+            ghcr.io/${{ github.repository_owner }}/${{ steps.full-tag.outputs.full_tag_with_alpine_version }}-integrations-builder-${{ matrix.arch.platform }}
+
+      - name: Save tags to create manifest lists
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && matrix.arch.platform == 'amd64'
+        run: |
+          {
+            echo ${{ steps.full-tag.outputs.full_tag }}
+            echo ${{ steps.full-tag.outputs.full_tag_with_alpine_version }}
+            echo ${{ steps.tag.outputs.tag }}
+            if [ "${ENABLE_BUILD_INTEGRATIONS_BUILDER}" = 1 ]; then
+              echo ${{ steps.full-tag.outputs.full_tag }}-integrations-builder
+              echo ${{ steps.full-tag.outputs.full_tag_with_alpine_version }}-integrations-builder
+            fi
+          } > tags-${{ strategy.job-index }}.txt
+      - name: Upload tags
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && matrix.arch.platform == 'amd64'
+        uses: actions/upload-artifact@v7
+        with:
+          name: tags-${{ strategy.job-index }}
+          path: tags-${{ strategy.job-index }}.txt
+
+      - name: Notify failure
+        uses: seqsense/sq-actions/notify-branch-build@main
+        if: failure() && github.event_name == 'push'
+        with:
+          title: ":x: Release failed"
+
+  manifest:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download tags
+        uses: actions/download-artifact@v8
+        with:
+          pattern: tags-*
+          merge-multiple: true
+      - name: Create manifest lists
+        run: |
+          for tag in $(cat tags-*.txt); do
+            image=ghcr.io/${{ github.repository_owner }}/${tag}
+            docker manifest create --amend ${image} ${image}-amd64 ${image}-arm64
+            docker manifest push --purge ${image}
+          done
 
       - name: Notify failure
         uses: seqsense/sq-actions/notify-branch-build@main
