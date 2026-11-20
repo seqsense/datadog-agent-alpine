@@ -196,9 +196,10 @@ RUN apk add \
 RUN echo -e "[global]\nbreak-system-packages = true" >> /etc/pip.conf
 
 ARG S6_OVERLAY_VERSION=2.1.0.2
-RUN wget https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-amd64.tar.gz \
-  && tar xzf /s6-overlay-amd64.tar.gz \
-  && rm /s6-overlay-amd64.tar.gz
+RUN S6_OVERLAY_ARCH=$(case $(apk --print-arch) in x86_64) echo amd64;; *) apk --print-arch;; esac) \
+  && wget https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${S6_OVERLAY_ARCH}.tar.gz \
+  && tar xzf /s6-overlay-${S6_OVERLAY_ARCH}.tar.gz \
+  && rm /s6-overlay-${S6_OVERLAY_ARCH}.tar.gz
 
 RUN mkdir -p \
     /checks.d \
