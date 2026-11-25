@@ -31,6 +31,9 @@ RUN git clone --depth=1 https://github.com/DataDog/integrations-core.git /tmp/in
   && cd /tmp/integrations-core \
   && git fetch --depth=1 origin refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION}:refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
   && git checkout refs/tags/${DATADOG_INTEGRATIONS_CORE_VERSION} \
+  && if [ "$(apk --print-arch)" != x86_64 ]; then \
+      sed '/"pytest-memray[>=]/d' -i datadog_checks_dev/pyproject.toml; \
+    fi \
   && version() { apk info $1 2> /dev/null | sed -n 's/\S\+-\([0-9\.]\+\)-r[0-9]\+ description:/\1/p'; } \
   && . ${HOME}/.cargo/env \
   && python3 -m pip install \
@@ -44,5 +47,8 @@ RUN git clone --depth=1 https://github.com/DataDog/integrations-core.git /tmp/in
     "/tmp/integrations-core/datadog_checks_dev[cli]" \
     "/tmp/integrations-core/ddev" \
   && rm -rf /tmp/integrations-core
+
+# note: removed packages from datadog_checks_dev/pyproject.toml on non-x86_64
+#   pytest-memray: memray has no musllinux wheel for aarch64 and requires libdebuginfod to build
 
 CMD ["/bin/sh"]
